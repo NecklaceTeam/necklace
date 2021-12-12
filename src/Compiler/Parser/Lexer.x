@@ -10,14 +10,15 @@ import qualified Data.Text.Lazy as T
 
 %wrapper "monad"
 
-$whitechar  = [\t\n\r\v\f\ ]
-$boolLit    = [true false]
-$special    = [\(\)\,\;\:\[\]\{\}]
-@keywords   = function|if|else|for|while|return|break|continue|int|bool
-@varId      = ([a-zA-Z_][a-zA-Z0-9_]*)
-@operator   = "+"|"-"|"*"|"/"|"%"|"<"|">"|">="|"<="|"=="|"!="|"&&"|"||"|"->"|"!"|"="
-@comment    = "~~".*
-@intLit     = [0-9]+
+$whitechar            = [\t\n\r\v\f\ ]
+$special              = [\(\)\,\;\:\[\]\{\}]
+@keywords             = function|void|if|else|for|while|return|break|continue|"->"|do|end
+@id                   = ([a-zA-Z_][a-zA-Z0-9_]*)
+@operator             = "+"|"-"|"*"|"/"|"%"|"<"|">"|">="|"<="|"=="|"!="|"&&"|"||"|"="|"!"
+@type                 = int|bool
+@comment              = "~~".*
+@intLit               = [0-9]+
+@boolLit              = true|false
 
 tokens :-
 <0> $white+           { skip }
@@ -25,21 +26,23 @@ tokens :-
 <0> @keywords         { mkL TokenKeyword }
 <0> @operator         { mkL TokenOperator }
 <0> @intLit           { mkL TokenIntLiteral }
-<0> $boolLit          { mkL TokenBoolLiteral }
+<0> @boolLit          { mkL TokenBoolLiteral }
 <0> $special          { mkL TokenSpecial }
-<0> @varId            { mkL TokenVarId }
+<0> @type             { mkL TokenType }
+<0> @id               { mkL TokenId }
 
 
 {
 data Lexeme = L AlexPosn Token String deriving (Eq, Show)
 
 data Token =
-        TokenKeyword    |
-        TokenSpecial    |
-        TokenOperator   |
-        TokenVarId      |
-        TokenBoolLiteral|
-        TokenIntLiteral |
+        TokenKeyword             |
+        TokenSpecial             |
+        TokenType                |
+        TokenOperator            |
+        TokenBoolLiteral         |
+        TokenIntLiteral          |
+        TokenId                  |
         TokenEOF
         deriving (Eq,Show)
 
