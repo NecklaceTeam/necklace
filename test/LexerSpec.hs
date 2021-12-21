@@ -20,31 +20,31 @@ spec = describe "Lexer" $ do
 
   describe "Keywords" $ do
     it "function scan" $ do 
-      runAlex "function" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "function"))
+      runAlex "function" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenFunction )
     it "do scan" $ do 
-      runAlex "do" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "do"))
+      runAlex "do" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenDo)
     it "end scan" $ do 
-      runAlex "end" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "end"))
+      runAlex "end" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenEnd)
     it "void scan" $ do 
-      runAlex "void" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "void"))
+      runAlex "void" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenVoid)
     it "if scan" $ do 
-      runAlex "if" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "if"))
+      runAlex "if" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenIf)
     it "else scan" $ do 
-      runAlex "else" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "else"))
+      runAlex "else" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenElse)
     it "for scan" $ do 
-      runAlex "for" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "for"))
+      runAlex "for" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenFor)
     it "while scan" $ do 
-      runAlex "while" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "while"))
+      runAlex "while" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenWhile )
     it "return scan" $ do 
-      runAlex "return" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "return"))
+      runAlex "return" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenReturn )
     it "break scan" $ do 
-      runAlex "break" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "break"))
+      runAlex "break" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenBreak )
     it "continue scan" $ do 
-      runAlex "continue" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "continue"))
+      runAlex "continue" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenContinue )
     it "-> scan" $ do 
-      runAlex "->" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenKeyword "->"))
+      runAlex "->" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) TokenArrow )
     it "differs between keyword and id" $ do
-      lex "function function1" `shouldBe` Right [Lexeme (AlexPn 0 1 1) (TokenKeyword "function"),Lexeme (AlexPn 9 1 10) (TokenId "function1"),Lexeme (AlexPn (-1) (-1) (-1)) TokenEOF]
+      lex "function function1" `shouldBe` Right [Lexeme (AlexPn 0 1 1) TokenFunction,Lexeme (AlexPn 9 1 10) (TokenId "function1"),Lexeme (AlexPn (-1) (-1) (-1)) TokenEOF]
   
   describe "Ids" $ do
     it "valid id" $ do
@@ -88,7 +88,7 @@ spec = describe "Lexer" $ do
     it "int literal scan" $ do
       runAlex "500" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenIntLiteral 500))
     it "bool literal scan" $ do
-      runAlex "false" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenBoolLiteral "false"))
+      runAlex "false" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenBoolLiteral False))
     it "bool type scan" $ do
       runAlex "bool" alexMonadScan `shouldBe` Right (Lexeme (AlexPn 0 1 1) (TokenType "bool"))
     it "int type scan" $ do
@@ -116,7 +116,7 @@ spec = describe "Lexer" $ do
       it "variable declaration" $ do
         lex "int x = 21" `shouldBe` Right [Lexeme (AlexPn 0 1 1) (TokenType "int"),Lexeme (AlexPn 4 1 5) (TokenId "x"),Lexeme (AlexPn 6 1 7) (TokenOperator "="),Lexeme (AlexPn 8 1 9) (TokenIntLiteral 21),Lexeme (AlexPn (-1) (-1) (-1)) TokenEOF]
       it "function declaration" $ do 
-        lex "function do_stuff(a: int, b: int) -> int do \n return 2 + 2; \n end" `shouldBe` Right [Lexeme (AlexPn 0 1 1) (TokenKeyword "function"),Lexeme (AlexPn 9 1 10) (TokenId "do_stuff"),Lexeme (AlexPn 17 1 18) TokenLeftParen,Lexeme (AlexPn 18 1 19) (TokenId "a"),Lexeme (AlexPn 19 1 20) TokenColon,Lexeme (AlexPn 21 1 22) (TokenType "int"),Lexeme (AlexPn 24 1 25) TokenComma,Lexeme (AlexPn 26 1 27) (TokenId "b"),Lexeme (AlexPn 27 1 28) TokenColon,Lexeme (AlexPn 29 1 30) (TokenType "int"),Lexeme (AlexPn 32 1 33) TokenRightParen,Lexeme (AlexPn 34 1 35) (TokenKeyword "->"),Lexeme (AlexPn 37 1 38) (TokenType "int"),Lexeme (AlexPn 41 1 42) (TokenKeyword "do"),Lexeme (AlexPn 46 2 2) (TokenKeyword "return"),Lexeme (AlexPn 53 2 9) (TokenIntLiteral 2),Lexeme (AlexPn 55 2 11) (TokenOperator "+"),Lexeme (AlexPn 57 2 13) (TokenIntLiteral 2),Lexeme (AlexPn 58 2 14) TokenSemicolon,Lexeme (AlexPn 62 3 2) (TokenKeyword "end"),Lexeme (AlexPn (-1) (-1) (-1)) TokenEOF]
+        lex "function do_stuff(a: int, b: int) -> int do \n return 2 + 2; \n end" `shouldBe` Right [Lexeme (AlexPn 0 1 1) TokenFunction,Lexeme (AlexPn 9 1 10) (TokenId "do_stuff"),Lexeme (AlexPn 17 1 18) TokenLeftParen,Lexeme (AlexPn 18 1 19) (TokenId "a"),Lexeme (AlexPn 19 1 20) TokenColon,Lexeme (AlexPn 21 1 22) (TokenType "int"),Lexeme (AlexPn 24 1 25) TokenComma,Lexeme (AlexPn 26 1 27) (TokenId "b"),Lexeme (AlexPn 27 1 28) TokenColon,Lexeme (AlexPn 29 1 30) (TokenType "int"),Lexeme (AlexPn 32 1 33) TokenRightParen,Lexeme (AlexPn 34 1 35) TokenArrow,Lexeme (AlexPn 37 1 38) (TokenType "int"),Lexeme (AlexPn 41 1 42) TokenDo,Lexeme (AlexPn 46 2 2) TokenReturn,Lexeme (AlexPn 53 2 9) (TokenIntLiteral 2),Lexeme (AlexPn 55 2 11) (TokenOperator "+"),Lexeme (AlexPn 57 2 13) (TokenIntLiteral 2),Lexeme (AlexPn 58 2 14) TokenSemicolon,Lexeme (AlexPn 62 3 2) TokenEnd,Lexeme (AlexPn (-1) (-1) (-1)) TokenEOF]
 
 main :: IO ()
 main = hspec spec

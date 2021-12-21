@@ -2,7 +2,7 @@
 module Compiler.Parser.Lexer where
 
 import Prelude hiding (lex)
-import Data.Char (isAlphaNum, chr)
+import Data.Char (isAlphaNum, chr, toUpper)
 import Data.Text.Lazy (Text)
 import qualified Data.Text.Lazy as T
 
@@ -25,19 +25,30 @@ tokens :-
 <0> $white+           { skip }
 <0> @comment          { skip }
 <0> @blockComment     { skip }
-<0> [\(]              { makeLexeme TokenLeftParen }
-<0> [\)]              { makeLexeme TokenRightParen }
-<0> [\,]              { makeLexeme TokenComma }
-<0> [\;]              { makeLexeme TokenSemicolon }
-<0> [\:]              { makeLexeme TokenColon }
-<0> [\[]              { makeLexeme TokenSquareLeftParen }
-<0> [\]]              { makeLexeme TokenSquareRightParen }
-<0> [toInt]           { makeLexeme TokenToIntConversion }
-<0> [toBool]          { makeLexeme TokenToBoolConversion}
-<0> @keywords         { makeLexeme_string TokenKeyword }
+<0> function          { makeLexeme TokenFunction }
+<0> void              { makeLexeme TokenVoid }
+<0> if                { makeLexeme TokenIf }
+<0> else              { makeLexeme TokenElse }
+<0> for               { makeLexeme TokenFor }
+<0> while             { makeLexeme TokenWhile }
+<0> return            { makeLexeme TokenReturn }
+<0> break             { makeLexeme TokenBreak }
+<0> continue          { makeLexeme TokenContinue }
+<0> "->"              { makeLexeme TokenArrow }
+<0> do                { makeLexeme TokenDo }
+<0> end               { makeLexeme TokenEnd }
+<0> \(                { makeLexeme TokenLeftParen }
+<0> \)                { makeLexeme TokenRightParen }
+<0> \,                { makeLexeme TokenComma }
+<0> \;                { makeLexeme TokenSemicolon }
+<0> \:                { makeLexeme TokenColon }
+<0> \[                { makeLexeme TokenSquareLeftParen }
+<0> \]                { makeLexeme TokenSquareRightParen }
+<0> toInt             { makeLexeme TokenToIntConversion }
+<0> toBool            { makeLexeme TokenToBoolConversion}
 <0> @operator         { makeLexeme_string TokenOperator }
 <0> @intLit           { makeLexeme_int TokenIntLiteral }
-<0> @boolLit          { makeLexeme_string TokenBoolLiteral }
+<0> @boolLit          { makeLexeme_bool TokenBoolLiteral }
 <0> @type             { makeLexeme_string TokenType }
 <0> @id               { makeLexeme_string TokenId }
 
@@ -55,10 +66,22 @@ data Token =
         TokenSemicolon           |
         TokenToBoolConversion    |
         TokenToIntConversion     |
+        TokenFunction            |
+        TokenVoid                |
+        TokenIf                  |
+        TokenElse                |
+        TokenFor                 |
+        TokenWhile               |
+        TokenReturn              |
+        TokenBreak               |
+        TokenContinue            |
+        TokenArrow               |
+        TokenDo                  |
+        TokenEnd                 |
         TokenKeyword     String  |
         TokenType        String  |
         TokenOperator    String  |
-        TokenBoolLiteral String  |
+        TokenBoolLiteral Bool    |
         TokenIntLiteral  Int     |
         TokenId          String  |
         TokenEOF
@@ -70,6 +93,7 @@ makeLexeme' f (p,_,_,str) len = return $ Lexeme p (f (take len str))
 makeLexeme tok = makeLexeme' (\_ -> tok)
 makeLexeme_string tok = makeLexeme' (\s -> tok s)
 makeLexeme_int tok = makeLexeme' (\s -> tok (read s :: Int))
+makeLexeme_bool tok = makeLexeme' (\s -> tok (read (toUpper(head s) : (tail s)) :: Bool))
 
 alexEOF = return $ Lexeme (AlexPn (-1) (-1) (-1)) TokenEOF
 
