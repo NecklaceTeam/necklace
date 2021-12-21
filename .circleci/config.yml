@@ -17,9 +17,10 @@ jobs:
       - run:
           name: "Load dependiencies"
           command: |
-            cabal new-install --only-dependencies
+            cabal update
+            cabal install --only-dependencies
             cabal install hspec-discover
-            cabal new-configure --enable-tests
+            cabal configure --enable-tests
       - run:
           name: "Run tests"
           command: "cabal test"
