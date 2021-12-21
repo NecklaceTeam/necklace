@@ -27,11 +27,12 @@ library
   build-depends:      base ^>=4.14.3.0
                       , text
                       , array
+  build-tool-depends: alex:alex
   exposed-modules:     Compiler.Parser.Lexer
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Wall
-executable necklace
+executable necklace_compiler
   main-is:            Main.hs
 
     -- Modules included in this executable, other than Main.
