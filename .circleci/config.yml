@@ -16,7 +16,10 @@ jobs:
       - checkout
       - run:
           name: "Load dependiencies"
-          command: "cabal install --enable-tests"
+          command: |
+            cabal new-install --only-dependencies
+            cabal install hspec-discover
+            cabal new-configure --enable-tests
       - run:
           name: "Run tests"
           command: "cabal test"
