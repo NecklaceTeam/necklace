@@ -1,7 +1,7 @@
 module LexerSpec (spec) where
 import SpecHelper ( hspec, describe, it, shouldBe, Spec )  
 import Prelude hiding(lex)
-import Compiler.Parser.Lexer
+import Compiler.Lexer
 spec :: Spec
 spec = describe "Lexer" $ do
   describe "Comments" $ do

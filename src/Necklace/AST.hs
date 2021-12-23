@@ -6,7 +6,7 @@ data ReturnType = ReturnType Type | Void
 
 data Declaration = Declaration String Type
 
-data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Literal]
+data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression]
 
 data Function = Function String [Declaration] ReturnType
 
@@ -40,4 +40,4 @@ data Operator = UnwrapPointer Expression
                 | And Expression Expression
                 | Or Expression Expression
 
-data Expression =  SubExpression Expression | LiteralExpression Literal | FunctionCall String [Expression] 
+data Expression = Operation Operator | SubExpression Expression | LiteralExpression Literal | FunctionCall String [Expression] 
