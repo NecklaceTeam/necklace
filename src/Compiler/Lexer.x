@@ -1,5 +1,5 @@
 {
-module Compiler.Parser.Lexer where
+module Compiler.Lexer where
 
 import Prelude hiding (lex)
 import Data.Char (isAlphaNum, chr, toUpper)
