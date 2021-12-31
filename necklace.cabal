@@ -27,8 +27,11 @@ library
   build-depends:      base ^>=4.14.3.0
                       , text
                       , array
+                      , containers
+                      , mtl
+                      , lens
   build-tool-depends: alex:alex
-  exposed-modules:    Compiler.Parser.Lexer, Necklace.AST
+  exposed-modules:    Compiler.Parser.Lexer, Necklace.AST, ContextAnalysis.Analyzer
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Wall
@@ -43,13 +46,15 @@ executable necklace_compiler
 
   build-depends:      base ^>=4.14.3.0
                       , text
+                      , mtl
+                      , lens
   build-tool-depends: alex:alex
   hs-source-dirs:     src
   default-language:   Haskell2010
 
 test-suite spec
   type: exitcode-stdio-1.0
-  other-modules: LexerSpec SpecHelper
+  other-modules: LexerSpec ContextAnalyzerSpec SpecHelper
   hs-source-dirs: test
   main-is: Spec.hs
   build-depends: base ^>=4.14.3.0
