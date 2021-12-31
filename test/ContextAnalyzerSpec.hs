@@ -80,7 +80,7 @@ spec = describe "ContextAnalysis" $ do
                     )
                   )
                 )
-      analyze ctx (ANZ.expressionType complexExp) `shouldBe`(Right ANZ.Int, ctx)
+      analyze ctx (ANZ.expressionType complexExp) `shouldBe`(Left "Minus has type Bool x Bool -> Bool", ctx)
 
 
 main :: IO ()

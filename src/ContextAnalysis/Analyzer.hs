@@ -94,6 +94,15 @@ binaryIntOp name l r = do
         (Int, Int) -> return Int
         _ -> throwError (name ++ " has type Int x Int -> Int")
 
+binaryBoolOp ::String -> AST.Expression -> AST.Expression -> Analyzer ExpressionType
+binaryBoolOp name l r = do
+    lt <- expressionType l
+    rt <- expressionType r
+    case (lt,rt) of
+        (Bool, Bool) -> return Bool
+        _ -> throwError (name ++ " has type Bool x Bool -> Bool")
+
+
 
 operatorType:: AST.Operator -> Analyzer ExpressionType
 -- UNARY --
@@ -124,16 +133,16 @@ operatorType (AST.LessEq l r) = binaryIntOp "Minus" l r
 operatorType (AST.Greater l r) = binaryIntOp "Minus" l r
 operatorType (AST.GreaterEq l r) = binaryIntOp "Minus" l r
 
-operatorType (AST.Equal l r) = binaryIntOp "Minus" l r
-operatorType (AST.NotEqual l r) = binaryIntOp "Minus" l r
-operatorType (AST.And l r) = binaryIntOp "Minus" l r
-operatorType (AST.Or l r) = binaryIntOp "Minus" l r
+operatorType (AST.Equal l r) = binaryBoolOp "Minus" l r
+operatorType (AST.NotEqual l r) = binaryBoolOp "Minus" l r
+operatorType (AST.And l r) = binaryBoolOp "Minus" l r
+operatorType (AST.Or l r) = binaryBoolOp "Minus" l r
 operatorType (AST.Assign n v) = do
     varT <- variableType n
     valT <- expressionType v
     case (varT, valT) of
         (Int, Int) -> return Int
-        (Bool, Bool) -> return Int
+        (Bool, Bool) -> return Bool
         (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
         (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
         (a, Any) -> return a
