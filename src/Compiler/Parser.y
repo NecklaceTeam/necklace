@@ -1,13 +1,15 @@
 {
 module Compiler.Parser where
+
 import Compiler.Lexer
 import Necklace.AST
+import Prelude hiding(lex)
 }
 
 %name parser
 %tokentype { Lexeme }
 %monad { Alex }
-%lexer { lex } { Lexeme _ TokenEOF }
+%lexer { lexwrap } { Lexeme _ TokenEOF }
 
 %error { parseError }
 
@@ -41,72 +43,101 @@ import Necklace.AST
       '||'            { Lexeme _ (TokenOperator "||") }
       '='             { Lexeme _ (TokenOperator "=") }
       void            { Lexeme _ TokenVoid}
+      function        { Lexeme _ TokenFunction }
+      if              { Lexeme _ TokenIf }
+      else            { Lexeme _ TokenElse }
+      for             { Lexeme _ TokenFor }
+      while           { Lexeme _ TokenWhile }
+      return          { Lexeme _ TokenReturn }
+      break           { Lexeme _ TokenBreak }
+      continue        { Lexeme _ TokenContinue }
+      '->'            { Lexeme _ TokenArrow }
+      do              { Lexeme _ TokenDo }
+      end             { Lexeme _ TokenEnd }
+
 
 %right '='
-%nonassoc '>' '<' '<=' '>=' '==' '!='
-%left '+' '-'
-%left '*' '/' '%'
-%left NEG UNWRAP '!'
-
-%%
-
-Type : int                                                             { Int }
-     | bool                                                            { Bool }
-     | [Type]                                                          { Array $2 }
-     | *Type                                                           { Pointer $2 }
-
-ReturnType : Type                                                      { ReturnType $1 }
-           | void                                                      { Void }
-                          
-Operator   : Expression '*' Expression                                 { Multiply $1 $3 }
-           | Expression '-' Expression                                 { Minus $1 $3 }
-           | Expression '+' Expression                                 { Plus $1 $3 }
-           | Expression '/' Expression                                 { Divide $1 $3 }
-           | Expression '%' Expression                                 { Modulo $1 $3 }
-           | Expression '<' Expression                                 { Less $1 $3 }
-           | Expression '<=' Expression                                { LessEq $1 $3 }
-           | Expression '>' Expression                                 { Greater $1 $3 }
-           | Expression '>=' Expression                                { GreaterEq $1 $3}
-           | Expression '==' Expression                                { Equal $1 $3 }
-           | Expression '!=' Expression                                { NotEqual $1 $3 }
-           | Expression '&&' Expression                                { And $1 $3 }
-           | Expression '||' Expression                                { Or $1 $3 }
-           | '!' Expression                                            { Negation $2 }
-           | '*' Expression %prec UNWRAP                               { UnwrapPointer $2}
-           | '-' Expression %prec NEG                                  { MinusUnary $2 }
-                          
-                          
-Expression : Literal                                                   { LiteralExpression $1 }
-           | name '(' Expressions ')'                                  { FunctionCall $1 $3 }
-           | Operator                                                  { Operation $1 }
-           | '(' Expression ')'                                        { SubExpression $2 }
-                          
-Expressions :   {- empty -}                                            { [] }
-            |   Expression                                             { [$1] }
-            |   Expression ',' Expressions                             { $1 : $2 }
-                          
-Declaration  : name ':' Type                                           { Declaration $1 $3 }
-                          
-Declarations : {- empty -}                                             { [] }
-             | Declaration                                             { [$1] }
-             | Declaration ',' Declarations                            { $1 : $2 }
-
-DeclarationsWithSemicolon : {- empty -}                                { [] }
-                          | Declaration ';'                            { [$1] }
-                          | Declaration ',' DeclarationsWithSemicolon  { $1 : $2 }
-
-Literal     : intLit                                                   { IntLiteral $1 }
-            | boolLit                                                  { BoolLiteral $1 }
-            | '[' Expressions ']'                                      { ArrayLiteral $2 }
+%left '||' 
+%left '&&'
+%left '==' '!='
+%left '>' '<' '<=' '>='     
+%left '+' '-'     
+%left '*' '/' '%'     
+%right NEG UNWRAP '!'      
      
-Function    : name '('Declarations')' ReturnType                       { Function $1 $3 $5 }
+%%     
+Start      : Functions                                                             { Start $1}
+     
+Functions : Function Functions                                                     { $1 : $2 }
+          | {- empty -}                                                            { [] }
+     
+Type       : int                                                                   { Int }
+           | bool                                                                  { Bool }
+           | '['Type']'                                                            { Array $2 }
+           | '*'Type                                                               { Pointer $2 }
+     
+ReturnType : Type                                                                  { ReturnType $1 }
+           | void                                                                  { Void }
+     
+Operator   : Expression '*' Expression                                             { Multiply $1 $3 }
+           | Expression '-' Expression                                             { Minus $1 $3 }
+           | Expression '+' Expression                                             { Plus $1 $3 }
+           | Expression '/' Expression                                             { Divide $1 $3 }
+           | Expression '%' Expression                                             { Modulo $1 $3 }
+           | Expression '<' Expression                                             { Less $1 $3 }
+           | Expression '<=' Expression                                            { LessEq $1 $3 }
+           | Expression '>' Expression                                             { Greater $1 $3 }
+           | Expression '>=' Expression                                            { GreaterEq $1 $3}
+           | Expression '==' Expression                                            { Equal $1 $3 }
+           | Expression '!=' Expression                                            { NotEqual $1 $3 }
+           | Expression '&&' Expression                                            { And $1 $3 }
+           | Expression '=' Expression                                             { Assign $1 $3 }
+           | Expression '||' Expression                                            { Or $1 $3 }
+           | '!' Expression                                                        { Negation $2 }
+           | '*' Expression %prec UNWRAP                                           { UnwrapPointer $2 }
+           | '-' Expression %prec NEG                                              { MinusUnary $2 }
+     
+     
+Expression : Literal                                                               { LiteralExpression $1 }
+           | name '(' Expressions ')'                                              { FunctionCall $1 $3 }
+           | Operator                                                              { Operation $1 }
+           | '(' Expression ')'                                                    { SubExpression $2 }
+     
+Expressions : Expressions ',' Expression                                           { $1 ++ $3 }
+            | Expression                                                           { [$1] }
+     
+Declaration  : name ':' Type                                                       { Declaration $1 $3 }
+     
+Declarations : Declarations ',' Declaration                                        { $1 ++ $3 }
+             | Declaration                                                         { [$1] }
+     
+Literal     : intLit                                                               { IntLiteral $1 }
+            | boolLit                                                              { BoolLiteral $1 }
+            | '[' Expressions ']'                                                  { ArrayLiteral $2 }
+          
+Statement   : name '(' Expressions ')' ';'                                         { FunctionCallStatement $1 $3}
+            | if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
+            | for '('Expression ',' Expression ',' Expression ')' do Body end      { ForStatement $3 $5 $7}
+            | while Expression do Body end                                         { WhileStatement $2 $4}
+            | return Expression ';'                                                { ReturnStatement $2}
+            | return ';'                                                           { VoidReturnStatement }
+            | break ';'                                                            { BreakStatement }
+            | continue ';'                                                         { ContinueStatement }
+     
+Statements  : {- empty -}                                                          { [] }
+            | Statements Statement                                                 { $1 ++ $2 }                                           
+     
+Body        : Declarations                                                         { Body $1 }
+     
+FunctionBody: Declarations Statements                                              { FunctionBody $1 $2}
 
-Body        : DeclarationsWithSemicolon Statement                      { Body $1 $2 }
+Function    : function name '('Declarations')' '->' ReturnType do FunctionBody end { Function $2 $4 $7 $9 }
+
 
 {
 
 parseError :: Lexeme -> Alex a
-parseError (Lexeme (AlexPn _ y z) _) = alexError ("Parse error at line " ++ show y ++ " and column " ++ show x)
+parseError (Lexeme (AlexPn _ y z) _) = alexError ("Parse error at line " ++ show y ++ " and column " ++ show z)
 
 
 }

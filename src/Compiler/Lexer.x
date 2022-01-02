@@ -105,5 +105,4 @@ alexLex = do lexeme@(Lexeme _ tok) <- alexMonadScan
              if tok == TokenEOF
                then return [lexeme]
                else (lexeme:) <$> alexLex
-
 }

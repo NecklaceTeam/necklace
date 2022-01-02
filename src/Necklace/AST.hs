@@ -1,5 +1,8 @@
 module Necklace.AST where
 
+
+newtype Start = Start [Function]
+
 data Type = Int | Bool | Array Type | Pointer Type
 
 data ReturnType = ReturnType Type | Void
@@ -8,9 +11,11 @@ data Declaration = Declaration String Type
 
 data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression]
 
-data Function = Function String [Declaration] ReturnType
+data Function = Function String [Declaration] ReturnType Body 
 
-data Body = Body [Declaration] [Statement]
+data FunctionBody = FunctionBody [Declaration] [Statement]
+
+newtype Body = Body [Statement]
 
 data Statement = FunctionCallStatement String [Expression]
                 | IfElseStatement Expression Body Body
@@ -39,5 +44,6 @@ data Operator = UnwrapPointer Expression
                 | NotEqual Expression Expression
                 | And Expression Expression
                 | Or Expression Expression
+                | Assign Declaration Expression
 
 data Expression = Operation Operator | SubExpression Expression | LiteralExpression Literal | FunctionCall String [Expression] 
