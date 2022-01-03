@@ -1,21 +1,23 @@
 module Necklace.AST where
 
 
-newtype Start = Start [Function]
+newtype Start = Start [Function] deriving(Show)
 
-data Type = Int | Bool | Array Type | Pointer Type
+data Type = Int | Bool | Array Type | Pointer Type deriving(Show)
 
-data ReturnType = ReturnType Type | Void
+data ReturnType = ReturnType Type | Void deriving(Show)
 
-data Declaration = Declaration String Type
+data Declaration = Declaration String Type deriving(Show)
 
-data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression]
+data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression] deriving(Show)
 
-data Function = Function String [Declaration] ReturnType Body 
+data Function = Function String [Declaration] ReturnType FunctionBody
+                | FunctionNoArgs String ReturnType FunctionBody 
+                deriving(Show) 
 
-data FunctionBody = FunctionBody [Declaration] [Statement]
+data FunctionBody = FunctionBody [Declaration] [Statement] deriving(Show) 
 
-newtype Body = Body [Statement]
+newtype Body = Body [Statement] deriving(Show)
 
 data Statement = FunctionCallStatement String [Expression]
                 | IfElseStatement Expression Body Body
@@ -25,7 +27,7 @@ data Statement = FunctionCallStatement String [Expression]
                 | ReturnStatement Expression
                 | VoidReturnStatement
                 | BreakStatement 
-                | ContinueStatement
+                | ContinueStatement deriving(Show)
 
 
 data Operator = UnwrapPointer Expression
@@ -44,6 +46,6 @@ data Operator = UnwrapPointer Expression
                 | NotEqual Expression Expression
                 | And Expression Expression
                 | Or Expression Expression
-                | Assign Declaration Expression
+                | Assign String Expression deriving(Show)
 
-data Expression = Operation Operator | SubExpression Expression | LiteralExpression Literal | FunctionCall String [Expression] 
+data Expression = Operation Operator | SubExpression Expression | LiteralExpression Literal | FunctionCall String [Expression] deriving(Show)
