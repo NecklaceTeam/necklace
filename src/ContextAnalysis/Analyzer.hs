@@ -44,6 +44,11 @@ makeLenses ''Context
 
 
 emptyFunctionContext:: ExpressionType -> FunctionContext
+emptyFunctionContext Undefined = FunctionContext {
+        _returnType=Nothing,
+        _registeredVariables=M.empty,
+        _callableFunctions=M.empty
+    }
 emptyFunctionContext rType = FunctionContext {
         _returnType=Just rType,
         _registeredVariables=M.empty,
