@@ -1,7 +1,7 @@
 module Necklace.AST where
 
 
-newtype Start = Start [Function] deriving(Show)
+newtype AST = AST [Function] deriving(Show)
 
 data Type = Int | Bool | Array Type | Pointer Type deriving(Show)
 
@@ -48,4 +48,9 @@ data Operator = UnwrapPointer Expression
                 | Or Expression Expression
                 | Assign String Expression deriving(Show)
 
-data Expression = Operation Operator | SubExpression Expression | LiteralExpression Literal | FunctionCall String [Expression] deriving(Show)
+data Expression = Operation Operator 
+                | SubExpression Expression
+                | LiteralExpression Literal 
+                | FunctionCall String [Expression]
+                | Variable String 
+                | ArrayIndex Expression Expression deriving(Show)

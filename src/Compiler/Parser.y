@@ -64,9 +64,10 @@ import Prelude hiding(lex)
 %left '+' '-'     
 %left '*' '/' '%'     
 %right NEG UNWRAP '!'      
+%left '['
      
 %%     
-Start      : Functions                                                             { Start $1 }
+Start      : Functions                                                             { AST $1 }
      
 Functions : Functions Function                                                     { $2:$1 }
           | {- empty -}                                                            { [] }
@@ -91,25 +92,29 @@ Operator   : Expression '*' Expression                                          
            | Expression '==' Expression                                            { Equal $1 $3 }
            | Expression '!=' Expression                                            { NotEqual $1 $3 }
            | Expression '&&' Expression                                            { And $1 $3 }
-           | name '=' Expression                                                   { Assign $1 $3 }
            | Expression '||' Expression                                            { Or $1 $3 }
            | '!' Expression                                                        { Negation $2 }
            | '*' Expression %prec UNWRAP                                           { UnwrapPointer $2 }
            | '-' Expression %prec NEG                                              { MinusUnary $2 }
+           | name '=' Expression                                                   { Assign $1 $3 }
      
      
 Expression : Literal                                                               { LiteralExpression $1 }
            | name '(' Expressions ')'                                              { FunctionCall $1 $3 }
            | Operator                                                              { Operation $1 }
            | '(' Expression ')'                                                    { SubExpression $2 }
+           | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
      
 Expressions : Expressions ',' Expression                                           { $3:$1 }
             | Expression                                                           { [$1] }
      
 Declaration  : name ':' Type                                                       { Declaration $1 $3 }
      
-Declarations : Declarations ',' Declaration                                        { $3:$1 }
+FunctionArgs : FunctionArgs ',' Declaration                                        { $3:$1 }
              | Declaration                                                         { [$1] }
+
+Declarations : Declarations Declaration ';'                                        { $2:$1 }
+             | Declaration ';'                                                     { [$1] }
      
 Literal     : intLit                                                               { IntLiteral $1 }
             | boolLit                                                              { BoolLiteral $1 }
@@ -123,16 +128,17 @@ Statement   : name '(' Expressions ')' ';'                                      
             | return ';'                                                           { VoidReturnStatement }
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
+
      
-Statements  : {- empty -}                                                          { [] }
-            | Statements Statement                                                 { $2 : $1 }                                           
+Statements  : Statements Statement                                                 { $2 : $1 }
+            | Statement                                                            { [$1] }                                          
      
 Body        : Statements                                                           { Body $1 }
      
 FunctionBody: Declarations Statements                                              { FunctionBody $1 $2}
             | Statements                                                           { FunctionBody [] $1}
             
-Function    : function name '('Declarations')' '->' ReturnType do FunctionBody end { Function $2 $4 $7 $9 }
+Function    : function name '('FunctionArgs')' '->' ReturnType do FunctionBody end { Function $2 $4 $7 $9 }
             | function name '('')' '->' ReturnType do FunctionBody end             { Function $2 [] $6 $8 }
 
 
@@ -143,7 +149,7 @@ lexwrap = (alexMonadScan >>= )
 parseError :: Lexeme -> Alex a
 parseError (Lexeme (AlexPn _ y z) _) = alexError ("Syntax error at line " ++ show y ++ " and column " ++ show z)
 
-parse :: String -> Either String Start
+parse :: String -> Either String AST
 parse s = runAlex s parser
 
 }
