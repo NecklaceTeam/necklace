@@ -62,7 +62,7 @@ end
 
 \section{Grammar}
 \begin{align*}
-<start> &\longrightarrow \ \textbf{[} <function> \textbf{]} \\
+<start> &\longrightarrow \ <function>^* \\
 <type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{[}<type>\textbf{]} \ | \ \textbf{*} <type> \\
 <return\_type> &\longrightarrow \ <type> \ | \ \textbf{void} \\
 <function>  &\longrightarrow \\ 
@@ -87,8 +87,8 @@ end
     &| \ ( <expression> ) \\
     &| \ <function\_call> \\
     &| \ <literal> \\
-    &| \ <expression> \textbf{[} <digit>^+ \textbf{]} \\
-<unary\_operator> &\longrightarrow \ \textbf{*} \ | \ \textbf{-} | \ \textbf{!} \\
+    &| \ <expression> \textbf{[} <expression> \textbf{]} \\
+<unary\_operator> &\longrightarrow \ \textbf{*} \ | \ \textbf{-} \ | \ \textbf{!} \\
 <binary\_operator> &\longrightarrow \ <arithmetic\_operator> \\ 
     &| \ <relational\_operator> \\
     &| \ <equality\_operator
