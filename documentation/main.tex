@@ -112,7 +112,32 @@ end
 <array\_literal> &\longrightarrow \ [<expr>^*] \\
 <identifier> &\longrightarrow \ <letter> \ | \ <identifier> <letter> \ | \ <identifier><digit> \\
 \end{align*}
-
+\subsection{Operators Precedence}
+\begin{center}
+\begin{tabular}{||c | c | c |  c|}
+ \hline
+ Priority & Category & Operator & Associativity\\
+ \hline
+ 1 & Postfix  & $[$ $]$ & Left to right \\  
+ \hline
+ 2 & Unary & $-$, $*$, $!$ & Right to left    \\
+  \hline
+ 3 & Multiplicative & $*$, $/$, $\%$ & Left to Right    \\
+ \hline
+ 4 & Additive & $+$, $-$ & Left to right \\ 
+ \hline
+ 5 & Relational	& $<$, $>$, $<=$, $>=$ & Left to right\\
+ \hline
+ 6 & Equality & $==$, $!=$ & Left to right \\
+ \hline
+ 7 & Logical AND & $\&\&$ & Left to right \\
+ \hline
+ 8 & Logical OR & $||$ & Left to right \\
+ \hline
+ 9 & Assignment & $=$ & Right to left \\
+ \hline
+\end{tabular}
+\end{center}
 \section{Type system}
 Necklace is a strongly typed language, so all type conversions have to be explicit.
 \subsection{Base types}
