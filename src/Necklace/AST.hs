@@ -22,7 +22,6 @@ newtype Body = Body [Statement] deriving(Show)
 data Statement = FunctionCallStatement String [Expression]
                 | IfElseStatement Expression Body Body
                 | ForStatement Expression Expression Expression Body
-                | Assigment String Expression
                 | WhileStatement Expression Body
                 | ReturnStatement Expression
                 | VoidReturnStatement
