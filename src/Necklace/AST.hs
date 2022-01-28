@@ -3,29 +3,31 @@ module Necklace.AST where
 class ErrorRepr t where
     typeRepr:: t -> String
 
-data Type = Int | Bool | Array Type | Pointer Type
+newtype AST = AST [Function] deriving(Show)
 
-data ReturnType = ReturnType Type | Void
+data Type = Int | Bool | Array Type | Pointer Type deriving(Show)
 
-data Declaration = Declaration String Type
+data ReturnType = ReturnType Type | Void deriving(Show)
 
-data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Literal]
+data Declaration = Declaration String Type deriving(Show)
+
+data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression] deriving(Show)
 
 data Function = Function String [Declaration] ReturnType FunctionBody
+                deriving(Show) 
 
-data FunctionBody = FunctionBody [Declaration] [Statement]
+data FunctionBody = FunctionBody [Declaration] [Statement] deriving(Show) 
 
-newtype Body = Body [Statement]
+newtype Body = Body [Statement] deriving(Show)
 
 data Statement = IfElseStatement Expression Body Body
                 | ForStatement Expression Expression Expression Body
+                | ExpressionStatement Expression
                 | WhileStatement Expression Body
                 | ReturnStatement Expression
                 | VoidReturnStatement
                 | BreakStatement 
-                | ContinueStatement
-                | ExpressionStatement Expression
-
+                | ContinueStatement deriving(Show)
 
 data Operator = UnwrapPointer Expression
                 | MinusUnary Expression
@@ -43,8 +45,14 @@ data Operator = UnwrapPointer Expression
                 | NotEqual Expression Expression
                 | And Expression Expression
                 | Or Expression Expression
-                | Assign String Expression
+                | Assign String Expression deriving(Show)
 
+data Expression = Operation Operator 
+                | SubExpression Expression
+                | LiteralExpression Literal 
+                | FunctionCall String [Expression]
+                | Variable String 
+                | ArrayIndex Expression Expression deriving(Show)
 
 instance ErrorRepr Operator where
     typeRepr (UnwrapPointer _) = "UnwrapPointer: (Pointer Any) -> Any"
@@ -65,10 +73,6 @@ instance ErrorRepr Operator where
     typeRepr (Or _ _) = "Or: (Int, Int) -> Int"
     typeRepr (Assign _ _) = "Assign: (Int, Int) -> Int"
 
-
-data Expression =  Operation Operator | SubExpression Expression | LiteralExpression Literal | Variable String | FunctionCall String [Expression] 
-
-newtype AST = AST [Function]
 
 -- instance Expression AST where 
 
