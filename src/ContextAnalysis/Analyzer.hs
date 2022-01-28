@@ -87,7 +87,7 @@ literalType:: AST.Literal -> FunctionAnalyzer ExpressionType
 literalType (AST.IntLiteral _) = return Int
 literalType (AST.BoolLiteral _) = return Bool
 literalType (AST.ArrayLiteral []) = return (Array Any)
-literalType (AST.ArrayLiteral (x:_)) = Array <$> literalType x
+literalType (AST.ArrayLiteral (x:_)) = Array <$> expressionType x
 
 variableType:: String -> FunctionAnalyzer ExpressionType
 variableType name = do
