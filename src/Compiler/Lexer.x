@@ -1,5 +1,5 @@
 {
-module Compiler.Parser.Lexer where
+module Compiler.Lexer where
 
 import Prelude hiding (lex)
 import Data.Char (isAlphaNum, chr, toUpper)
@@ -105,5 +105,4 @@ alexLex = do lexeme@(Lexeme _ tok) <- alexMonadScan
              if tok == TokenEOF
                then return [lexeme]
                else (lexeme:) <$> alexLex
-
 }

@@ -2,7 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LINE 1 "Lexer.x" #-}
 
-module Compiler.Parser.Lexer where
+module Compiler.Lexer where
 
 import Prelude hiding (lex)
 import Data.Char (isAlphaNum, chr, toUpper)
@@ -15208,7 +15208,6 @@ alexLex = do lexeme@(Lexeme _ tok) <- alexMonadScan
              if tok == TokenEOF
                then return [lexeme]
                else (lexeme:) <$> alexLex
-
 
 alex_action_0 =  skip 
 alex_action_1 =  skip 
