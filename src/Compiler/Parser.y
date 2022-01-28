@@ -120,9 +120,9 @@ Literal     : intLit                                                            
             | boolLit                                                              { BoolLiteral $1 }
             | '[' Expressions ']'                                                  { ArrayLiteral $2 }
           
-Statement   : name '(' Expressions ')' ';'                                         { FunctionCallStatement $1 $3}
-            | if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
+Statement   : if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
             | for '('Expression ',' Expression ',' Expression ')' do Body end      { ForStatement $3 $5 $7 $10}
+            | Expression ';'                                                       { ExpressionStatement $1}
             | while Expression do Body end                                         { WhileStatement $2 $4}
             | return Expression ';'                                                { ReturnStatement $2}
             | return ';'                                                           { VoidReturnStatement }
