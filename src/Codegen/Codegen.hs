@@ -21,7 +21,6 @@ import qualified Data.ByteString.Short (toShort, ShortByteString)
 import Data.ByteString.UTF8 (fromString)
 import Data.ByteString.Short (toShort)
 import LLVM.Pretty (ppllvm)
-import qualified Data.Text.IO as TX
 import Data.Text.Lazy (toStrict)
 
 newtype CodegenEnv = CodegenEnv {
@@ -47,6 +46,10 @@ toAstType:: N.Type -> LAST.Type
 toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
 
+returnTypeToAstType:: N.ReturnType -> LAST.Type
+returnTypeToAstType (N.ReturnType t) = toAstType t
+returnTypeToAstType N.Void = LTypes.void 
+
 
 genOperator:: N.Operator -> Generator LAST.Operand
 genOperator (N.Assign name expr) = do
@@ -63,20 +66,26 @@ genExpression (N.LiteralExpression (N.IntLiteral x)) = do
 genExpression (N.LiteralExpression (N.BoolLiteral x)) = do
   return $ LConstant.bit (if x then 1 else 0)
 
+
 genStatement :: N.Statement -> Generator ()
 genStatement (N.ExpressionStatement st) = void $ genExpression st
+genStatement (N.ReturnStatement expr) = do
+  exprOp <- genExpression expr
+  void $ LInstruction.ret exprOp
+  
+genStatement (N.VoidReturnStatement) = void $ LInstruction.retVoid
+
 
 genStatemens:: [N.Statement] -> Generator ()
 genStatemens [st] = genStatement st
 genStatemens [] = return ()
 
 
-
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
-genFunction (N.Function name _ (N.ReturnType ret) (N.FunctionBody _ sts)) = mdo
+genFunction (N.Function name _ ret (N.FunctionBody _ sts)) = mdo
     registerOperandM name function
     function <- do
-      let astRet = toAstType ret
+      let astRet = returnTypeToAstType ret
       LModule.function (LAST.mkName name) [] astRet bodyGenerator
     return ()
       where 
@@ -94,9 +103,6 @@ codegenProgram (N.AST funcs) =
         mapM_ genFunction funcs
   
 
-compile ::  N.AST -> IO ()
-compile ast = do
-  let llvmModule = codegenProgram ast
-  let z = ppllvm llvmModule
-  TX.putStrLn (toStrict z)
+codegen ::  N.AST -> Text
+codegen = toStrict .ppllvm . codegenProgram 
       

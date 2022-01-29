@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecursiveDo #-}
 module ContextAnalysis.Analyzer where
 import qualified Necklace.AST as AST
 import qualified Data.Map as M
@@ -8,6 +9,7 @@ import Control.Monad.State (StateT (runStateT), gets, modify, void)
 import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
+import Data.List
 
 
 data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
@@ -269,7 +271,8 @@ appendError err = do
 
 validateAST:: AST.AST -> Analyzer ()
 validateAST (AST.AST []) = return ()
-validateAST (AST.AST (f:fs)) = do
+validateAST (AST.AST (f:fs)) = mdo
+    registerFunction f
     regFuncs <- gets (^. registeredFunctions)
     let funcCtx = set callableFunctions regFuncs (emptyFunctionContext Undefined)
     let result = analyzeFunction funcCtx (validateFunction f)
@@ -277,3 +280,10 @@ validateAST (AST.AST (f:fs)) = do
         (Left err, _) -> appendError err
         (_, _) -> return ()
     validateAST $ AST.AST fs
+
+
+validate:: AST.AST -> Either String AST.AST
+validate ast = case ctx ^. errors of
+                    [] -> return ast
+                    err -> Left (intercalate "\n" (map ("ERROR: " ++ ) err))
+    where ((), ctx) = analyze emptyContext $ validateAST ast
