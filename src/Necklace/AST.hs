@@ -73,4 +73,3 @@ instance ErrorRepr Operator where
     typeRepr (Or _ _) = "Or: (Int, Int) -> Int"
     typeRepr (Assign _ _) = "Assign: (Int, Int) -> Int"
 
-
