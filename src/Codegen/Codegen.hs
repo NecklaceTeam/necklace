@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wno-incomplete-patterns #-}
 {-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE TupleSections #-}
 module Codegen.Codegen where
 
 import qualified Data.Map as M
@@ -14,10 +15,10 @@ import qualified LLVM.AST.Type as LTypes
 import qualified LLVM.AST as LAST
 
 import qualified Necklace.AST as N
-import Control.Monad.State.Lazy ()
 import qualified Control.Monad.ST as N
-import Control.Monad (void)
 import qualified Data.ByteString.Short (toShort, ShortByteString)
+import Control.Monad.State.Lazy ()
+import Control.Monad (void)
 import Data.ByteString.UTF8 (fromString)
 import Data.ByteString.Short (toShort)
 import LLVM.Pretty (ppllvm)
@@ -38,6 +39,7 @@ registerOperandM :: String -> LAST.Operand -> LModule.ModuleBuilderT (State Code
 registerOperandM name op =
   modify $ \env -> env { operands = M.insert name op (operands env) }
 
+
 toName :: String -> Data.ByteString.Short.ShortByteString
 toName  = toShort . fromString
 
@@ -46,18 +48,47 @@ toAstType:: N.Type -> LAST.Type
 toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
 
+
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
 returnTypeToAstType N.Void = LTypes.void 
 
 
 genOperator:: N.Operator -> Generator LAST.Operand
+genOperator (N.Plus exprL exprR) = do
+  lhs <- genExpression exprL
+  rhs <- genExpression exprR
+  LInstruction.add lhs rhs
+
+genOperator (N.Minus exprL exprR) = do
+  lhs <- genExpression exprL
+  rhs <- genExpression exprR
+  LInstruction.sub lhs rhs
+
+genOperator (N.Multiply exprL exprR) = do
+  lhs <- genExpression exprL
+  rhs <- genExpression exprR
+  LInstruction.mul lhs rhs
+
+genOperator (N.Divide exprL exprR) = do
+  lhs <- genExpression exprL
+  rhs <- genExpression exprR
+  LInstruction.sdiv lhs rhs
+
+genOperator (N.Modulo exprL exprR) = do
+  lhs <- genExpression exprL
+  rhs <- genExpression exprR
+-- Maybe we should get real modulus here?
+  LInstruction.srem lhs rhs
+
 genOperator (N.Assign name expr) = do
-  op <- get
-  let lOp = (M.! name) . operands $ op
+  lOp <- gets ((M.! name) . operands)
   rOp <- genExpression expr
   LInstruction.store lOp 0 rOp
   return rOp
+
+
+
 
 genExpression:: N.Expression  -> Generator LAST.Operand
 genExpression (N.LiteralExpression (N.IntLiteral x)) = do
@@ -65,6 +96,16 @@ genExpression (N.LiteralExpression (N.IntLiteral x)) = do
 
 genExpression (N.LiteralExpression (N.BoolLiteral x)) = do
   return $ LConstant.bit (if x then 1 else 0)
+
+genExpression (N.Operation oper) = genOperator oper
+genExpression (N.SubExpression expr) = genExpression expr 
+genExpression (N.FunctionCall name exprs) = do
+  funcOp <- gets ((M.! name) . operands)
+  args <- mapM_ (genExpression exprs)
+  LInstruction.call 12
+
+
+-- genExpression (Variable name) =
 
 
 genStatement :: N.Statement -> Generator ()
@@ -76,9 +117,8 @@ genStatement (N.ReturnStatement expr) = do
 genStatement (N.VoidReturnStatement) = void $ LInstruction.retVoid
 
 
-genStatemens:: [N.Statement] -> Generator ()
-genStatemens [st] = genStatement st
-genStatemens [] = return ()
+genStatements:: [N.Statement] -> Generator ()
+genStatements = mapM_ genStatement
 
 
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
@@ -92,7 +132,7 @@ genFunction (N.Function name _ ret (N.FunctionBody _ sts)) = mdo
         bodyGenerator :: [LAST.Operand] -> Generator ()
         bodyGenerator _ = do
           _entry <- LMonad.block `LMonad.named` toName "entry"
-          genStatemens sts
+          genStatements sts
 
 
 codegenProgram :: N.AST -> LAST.Module
@@ -105,4 +145,4 @@ codegenProgram (N.AST funcs) =
 
 codegen ::  N.AST -> Text
 codegen = toStrict .ppllvm . codegenProgram 
-      
+
