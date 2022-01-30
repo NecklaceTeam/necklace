@@ -88,8 +88,15 @@ toExpressionTypeReturn AST.Void = Nothing
 literalType:: AST.Literal -> FunctionAnalyzer ExpressionType
 literalType (AST.IntLiteral _) = return Int
 literalType (AST.BoolLiteral _) = return Bool
-literalType (AST.ArrayLiteral []) = return (Array Any)
-literalType (AST.ArrayLiteral (x:_)) = Array <$> expressionType x
+literalType (AST.ArrayLiteral []) = return (Array Any) 
+literalType (AST.ArrayLiteral [x]) = Array <$> expressionType x
+literalType (AST.ArrayLiteral (x:y:xs)) = do
+    ft <- expressionType x
+    st <- expressionType y
+    if ft == st then
+        literalType (AST.ArrayLiteral (y:xs))
+    else
+        throwError "All values in array must be of the same type"
 
 variableType:: String -> FunctionAnalyzer ExpressionType
 variableType name = do
@@ -239,7 +246,11 @@ validateStatements sts = Any <$ mapM validateStatement sts
 
 registerVariable:: AST.Declaration -> FunctionAnalyzer ExpressionType
 registerVariable (AST.Declaration name tp) = do
-    (modify . over registeredVariables. M.insert name . toExpressionType) tp
+    variableMap <- gets (^. registeredVariables)
+    if M.member name variableMap then
+        throwError ("Variable " ++name ++" is already declared in this scope")
+    else 
+        (modify . over registeredVariables. M.insert name . toExpressionType) tp 
     return Any
 
 cleanRegisteredVariables:: FunctionAnalyzer ExpressionType
