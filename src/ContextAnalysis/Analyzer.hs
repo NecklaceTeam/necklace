@@ -115,6 +115,14 @@ binaryBoolOp name l r = do
         (Bool, Bool) -> return Bool
         _ -> throwError (name ++ " has type Bool x Bool -> Bool")
 
+binaryCompOp ::String -> AST.Expression -> AST.Expression -> FunctionAnalyzer ExpressionType
+binaryCompOp name l r = do
+    lt <- expressionType l
+    rt <- expressionType r
+    case (lt,rt) of
+        (Int, Int) -> return Bool
+        _ -> throwError (name ++ " has type Int x Int -> Bool")
+
 
 
 operatorType:: AST.Operator -> FunctionAnalyzer ExpressionType
@@ -142,10 +150,10 @@ operatorType (AST.Minus l r) = binaryIntOp "Minus" l r
 operatorType (AST.Multiply l r) = binaryIntOp "Multiply" l r
 operatorType (AST.Divide l r) = binaryIntOp "Divide" l r
 operatorType (AST.Modulo l r) = binaryIntOp "Modulo" l r
-operatorType (AST.Less l r) = binaryIntOp "Less" l r
-operatorType (AST.LessEq l r) = binaryIntOp "LessEq" l r
-operatorType (AST.Greater l r) = binaryIntOp "Greater" l r
-operatorType (AST.GreaterEq l r) = binaryIntOp "GreaterEq" l r
+operatorType (AST.Less l r) = binaryCompOp "Less" l r
+operatorType (AST.LessEq l r) = binaryCompOp "LessEq" l r
+operatorType (AST.Greater l r) = binaryCompOp "Greater" l r
+operatorType (AST.GreaterEq l r) = binaryCompOp "GreaterEq" l r
 operatorType (AST.Equal l r) = binaryBoolOp "Equal" l r
 operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r

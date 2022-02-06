@@ -152,15 +152,19 @@ genStatement (N.IfElseStatement expr bdt bdf) = mdo
   nextBlock <- LMonad.block `LMonad.named` toName "next"
   return ()
 
--- genStatement (N.WhileStatement expr bd) = mdo
---   body <- LMonad.block `LMonad.named` toName "body"
---   bool <- genExpression expr
---   LInstruction.condBr bool body next
---   genBody bd 
---   nBool <- genExpression expr
+genStatement (N.WhileStatement expr bd) = mdo
+  LInstruction.br condBody
 
---   next <- LMonad.block `LMonad.named` toName "next"
---   return ()
+  condBody <- LMonad.block `LMonad.named` toName "cond"
+  bool <- genExpression expr
+  LInstruction.condBr bool whileBody next
+
+  whileBody <- LMonad.block `LMonad.named` toName "whilebody"
+  genBody bd
+  LInstruction.br condBody
+
+  next <- LMonad.block `LMonad.named` toName "next"
+  return ()
 
 
 genStatement (N.ExpressionStatement st) = void $ genExpression st
