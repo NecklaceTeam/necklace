@@ -55,7 +55,6 @@ data Expression = Operation Operator
                 | ArrayIndex Expression Expression deriving(Show)
 
 
-
 instance ErrorRepr Operator where
     typeRepr (UnwrapPointer _) = "UnwrapPointer: (Pointer Any) -> Any"
     typeRepr (Negation _) = "Negation: (Pointer Any) -> Any"

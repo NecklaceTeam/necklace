@@ -16,9 +16,6 @@ version:            0.1.0.0
 author:             pagmerek
 maintainer:         p.gmerek@student.uj.edu.pl
 
--- A copyright notice.
--- copyright:
--- category:
 extra-source-files:
     README.md
     CHANGELOG.md
@@ -30,14 +27,24 @@ library
                       , containers
                       , mtl
                       , lens
+                      , llvm-hs-pure
+                      , llvm-hs-pretty
+                      , bytestring
+                      , utf8-string
   build-tool-depends: alex:alex
                       , happy:happy
-  exposed-modules:    Compiler.Lexer, Necklace.AST, Compiler.Parser, ContextAnalysis.Analyzer
+  exposed-modules:    Main
+                      , Compiler.Lexer
+                      , Necklace.AST
+                      , Compiler.Parser
+                      , ContextAnalysis.Analyzer
+                      , Codegen.Codegen
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options: -Wall
 executable necklace_compiler
   main-is:            Main.hs
+  other-modules: Codegen.Codegen ContextAnalysis.Analyzer Compiler.Lexer Compiler.Parser Necklace.AST
 
     -- Modules included in this executable, other than Main.
     -- other-modules:
@@ -47,8 +54,14 @@ executable necklace_compiler
 
   build-depends:      base ^>=4.14.3.0
                       , text
+                      , array
+                      , containers
                       , mtl
                       , lens
+                      , llvm-hs-pure
+                      , llvm-hs-pretty
+                      , bytestring
+                      , utf8-string
   build-tool-depends: alex:alex
                       , happy:happy
   hs-source-dirs:     src
