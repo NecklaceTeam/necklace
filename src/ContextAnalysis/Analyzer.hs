@@ -10,6 +10,7 @@ import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
 import Data.List
+import Debug.Trace (traceShow)
 
 
 data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
@@ -75,7 +76,7 @@ analyze ctx m = runIdentity (runStateT m ctx)
 
 toExpressionType:: AST.Type -> ExpressionType
 toExpressionType AST.Int = Int
-toExpressionType AST.Bool = Int
+toExpressionType AST.Bool = Bool 
 toExpressionType (AST.Array t) = Array (toExpressionType t)
 toExpressionType (AST.Pointer t) = Pointer (toExpressionType t)
 
@@ -158,6 +159,7 @@ operatorType (AST.Assign n v) = do
         (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
         (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
         (a, Any) -> return a
+        (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
 
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
