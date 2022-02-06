@@ -130,8 +130,9 @@ Statement   : if Expression do Body else Body end                               
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
 
-     
-Statements  : Statements Statement                                                 { $2 : $1 }
+Statements  : Statements_                                                          { reverse $1 }
+
+Statements_ : Statements_ Statement                                                { $2 : $1 }
             | Statement                                                            { [$1] }                                          
      
 Body        : Statements                                                           { Body $1 }
