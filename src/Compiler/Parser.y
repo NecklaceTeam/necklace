@@ -104,6 +104,7 @@ Expression : Literal                                                            
            | Operator                                                              { Operation $1 }
            | '(' Expression ')'                                                    { SubExpression $2 }
            | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
+           | name                                                                  { Variable $1 }
      
 Expressions : Expressions ',' Expression                                           { $3:$1 }
             | Expression                                                           { [$1] }
