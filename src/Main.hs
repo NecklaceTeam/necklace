@@ -6,13 +6,16 @@ import Codegen.Codegen (codegen)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import System.IO (openFile, IOMode (ReadMode))
+import Debug.Trace
 
 
 compile :: String -> Either String T.Text
 compile input = do
     ast <- parse input
-    tast <- validate ast
+    -- Left $ show ast
+    tast <- validate $ traceShow ast ast
     return $ codegen tast
+
 
 main :: IO ()
 main = do

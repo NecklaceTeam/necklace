@@ -3,6 +3,7 @@
 {-# LANGUAGE TupleSections #-}
 module Codegen.Codegen where
 
+import Debug.Trace
 import qualified Data.Map as M
 import Data.Text (Text)
 import Control.Monad.State (State, gets, modify, get, MonadState, evalState)
@@ -13,16 +14,18 @@ import qualified LLVM.IRBuilder.Instruction as LInstruction
 import qualified LLVM.IRBuilder.Constant as LConstant
 import qualified LLVM.AST.Type as LTypes
 import qualified LLVM.AST as LAST
+import qualified LLVM.AST.IntegerPredicate as IP
 
 import qualified Necklace.AST as N
 import qualified Control.Monad.ST as N
 import qualified Data.ByteString.Short (toShort, ShortByteString)
 import Control.Monad.State.Lazy ()
-import Control.Monad (void)
+import Control.Monad (void, unless)
 import Data.ByteString.UTF8 (fromString)
 import Data.ByteString.Short (toShort)
 import LLVM.Pretty (ppllvm)
 import Data.Text.Lazy (toStrict)
+import qualified Control.Lens as LMonad
 
 newtype CodegenEnv = CodegenEnv {
                     operands :: M.Map String LAST.Operand }
@@ -51,36 +54,56 @@ toAstType N.Bool = LTypes.i1
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
-returnTypeToAstType N.Void = LTypes.void 
+returnTypeToAstType N.Void = LTypes.void
 
+genUnaryOperator:: N.Expression -> (LAST.Operand -> Generator LAST.Operand) -> Generator LAST.Operand
+genUnaryOperator expr genFunc = do
+  op <- genExpression expr
+  genFunc op
+
+genBinaryOperator:: N.Expression -> N.Expression ->
+   (LAST.Operand -> LAST.Operand -> Generator LAST.Operand) ->
+      Generator LAST.Operand
+genBinaryOperator exprL exprR genFunc = do
+  lhs <- genExpression exprL
+  rhs <- genExpression exprR
+  genFunc lhs rhs
 
 genOperator:: N.Operator -> Generator LAST.Operand
+genOperator (N.UnwrapPointer expr) = do
+  genUnaryOperator expr (`LInstruction.load` 0)
+genOperator (N.MinusUnary expr) = do
+  genUnaryOperator expr (LInstruction.sub (LConstant.int32 0))
+genOperator (N.Negation expr) = do
+  genUnaryOperator expr (`LInstruction.xor` LConstant.bit 1)
+
 genOperator (N.Plus exprL exprR) = do
-  lhs <- genExpression exprL
-  rhs <- genExpression exprR
-  LInstruction.add lhs rhs
-
+  genBinaryOperator exprL exprR LInstruction.add
 genOperator (N.Minus exprL exprR) = do
-  lhs <- genExpression exprL
-  rhs <- genExpression exprR
-  LInstruction.sub lhs rhs
-
+  genBinaryOperator exprL exprR LInstruction.sub
 genOperator (N.Multiply exprL exprR) = do
-  lhs <- genExpression exprL
-  rhs <- genExpression exprR
-  LInstruction.mul lhs rhs
-
+  genBinaryOperator exprL exprR LInstruction.mul
 genOperator (N.Divide exprL exprR) = do
-  lhs <- genExpression exprL
-  rhs <- genExpression exprR
-  LInstruction.sdiv lhs rhs
-
+  genBinaryOperator exprL exprR LInstruction.sdiv
 genOperator (N.Modulo exprL exprR) = do
-  lhs <- genExpression exprL
-  rhs <- genExpression exprR
--- Maybe we should get real modulus here?
-  LInstruction.srem lhs rhs
-
+  -- Maybe we should get real modulus here?
+  genBinaryOperator exprL exprR LInstruction.srem
+genOperator (N.Less exprL exprR) = do
+  genBinaryOperator exprL exprR (LInstruction.icmp IP.SLT)
+genOperator (N.LessEq exprL exprR) = do
+  genBinaryOperator exprL exprR (LInstruction.icmp IP.SLE)
+genOperator (N.Greater exprL exprR) = do
+  genBinaryOperator exprL exprR (LInstruction.icmp IP.SGT)
+genOperator (N.GreaterEq exprL exprR) = do
+  genBinaryOperator exprL exprR (LInstruction.icmp IP.SGE)
+genOperator (N.Equal exprL exprR) = do
+  genBinaryOperator exprL exprR (LInstruction.icmp IP.EQ)
+genOperator (N.NotEqual exprL exprR) = do
+  genBinaryOperator exprL exprR (LInstruction.icmp IP.NE)
+genOperator (N.And exprL exprR) = do
+  genBinaryOperator exprL exprR LInstruction.and
+genOperator (N.Or exprL exprR) = do
+  genBinaryOperator exprL exprR LInstruction.or
 genOperator (N.Assign name expr) = do
   lOp <- gets ((M.! name) . operands)
   rOp <- genExpression expr
@@ -88,51 +111,84 @@ genOperator (N.Assign name expr) = do
   return rOp
 
 
-
-
 genExpression:: N.Expression  -> Generator LAST.Operand
-genExpression (N.LiteralExpression (N.IntLiteral x)) = do
-  return $ LConstant.int32 (fromIntegral x)
-
-genExpression (N.LiteralExpression (N.BoolLiteral x)) = do
-  return $ LConstant.bit (if x then 1 else 0)
-
 genExpression (N.Operation oper) = genOperator oper
-genExpression (N.SubExpression expr) = genExpression expr 
+genExpression (N.SubExpression expr) = genExpression expr
+genExpression (N.LiteralExpression lit) = do
+  case lit of
+    N.IntLiteral x -> return $ LConstant.int32 (fromIntegral x)
+    N.BoolLiteral x -> return $ LConstant.bit (if x then 1 else 0)
+
 genExpression (N.FunctionCall name exprs) = do
   funcOp <- gets ((M.! name) . operands)
-  args <- mapM_ (genExpression exprs)
-  LInstruction.call 12
+  args <- mapM (fmap (, []) . genExpression) exprs
+  LInstruction.call funcOp args
+-- genExpression (N.ArrayIndex name exprs) = do
+genExpression (N.Variable name) = do
+  op <- gets ((M.! name) . operands)
+  LInstruction.load op 0
 
+genBody :: N.Body -> Generator ()
+genBody (N.Body sts) = mapM_ genStatement sts
 
--- genExpression (Variable name) =
-
+skipIfReturn :: LMonad.MonadIRBuilder m => m () -> m ()
+skipIfReturn gen = do
+  z <- LMonad.hasTerminator
+  unless z gen
 
 genStatement :: N.Statement -> Generator ()
+genStatement (N.IfElseStatement expr bdt bdf) = mdo
+  bool <- genExpression expr
+  LInstruction.condBr bool trueBody falseBody
+
+  trueBody <- LMonad.block `LMonad.named` toName "true"
+  genBody bdt
+  skipIfReturn $ LInstruction.br nextBlock
+
+  falseBody <- LMonad.block `LMonad.named` toName "false"
+  genBody bdf
+  skipIfReturn $ LInstruction.br nextBlock
+
+  nextBlock <- LMonad.block `LMonad.named` toName "next"
+  return ()
+
+-- genStatement (N.WhileStatement expr bd) = mdo
+--   body <- LMonad.block `LMonad.named` toName "body"
+--   bool <- genExpression expr
+--   LInstruction.condBr bool body next
+--   genBody bd 
+--   nBool <- genExpression expr
+
+--   next <- LMonad.block `LMonad.named` toName "next"
+--   return ()
+
+
 genStatement (N.ExpressionStatement st) = void $ genExpression st
 genStatement (N.ReturnStatement expr) = do
   exprOp <- genExpression expr
   void $ LInstruction.ret exprOp
-  
-genStatement (N.VoidReturnStatement) = void $ LInstruction.retVoid
+genStatement N.VoidReturnStatement = void LInstruction.retVoid
 
 
-genStatements:: [N.Statement] -> Generator ()
-genStatements = mapM_ genStatement
+genDeclaration:: N.Declaration -> Generator ()
+genDeclaration (N.Declaration name tp) = do
+  op <- LInstruction.alloca (toAstType tp) Nothing 0
+  registerOperand name op
 
 
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
-genFunction (N.Function name _ ret (N.FunctionBody _ sts)) = mdo
+genFunction (N.Function name params ret (N.FunctionBody dec sts)) = mdo
     registerOperandM name function
     function <- do
       let astRet = returnTypeToAstType ret
       LModule.function (LAST.mkName name) [] astRet bodyGenerator
     return ()
-      where 
+      where
         bodyGenerator :: [LAST.Operand] -> Generator ()
         bodyGenerator _ = do
           _entry <- LMonad.block `LMonad.named` toName "entry"
-          genStatements sts
+          mapM_ genDeclaration dec
+          mapM_ genStatement sts
 
 
 codegenProgram :: N.AST -> LAST.Module
@@ -141,8 +197,8 @@ codegenProgram (N.AST funcs) =
     $ LModule.buildModuleT (toName "necklace")
     $ do
         mapM_ genFunction funcs
-  
+
 
 codegen ::  N.AST -> Text
-codegen = toStrict .ppllvm . codegenProgram 
+codegen = toStrict . ppllvm . codegenProgram
 
