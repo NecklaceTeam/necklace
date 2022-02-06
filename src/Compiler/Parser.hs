@@ -1160,7 +1160,7 @@ action_133 _ = happyReduce_44
 happyReduce_1 = happySpecReduce_1  4 happyReduction_1
 happyReduction_1 (HappyAbsSyn5  happy_var_1)
 	 =  HappyAbsSyn4
-		 (AST happy_var_1
+		 (AST (reverse happy_var_1)
 	)
 happyReduction_1 _  = notHappyAtAll 
 
@@ -1383,7 +1383,7 @@ happyReduction_28 (_ `HappyStk`
 	(HappyTerminal (Lexeme _ (TokenId happy_var_1))) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn9
-		 (FunctionCall happy_var_1 happy_var_3
+		 (FunctionCall happy_var_1 (reverse happy_var_3)
 	) `HappyStk` happyRest
 
 happyReduce_29 = happySpecReduce_1  9 happyReduction_29
@@ -1496,7 +1496,7 @@ happyReduction_42 _
 	(HappyAbsSyn10  happy_var_2)
 	_
 	 =  HappyAbsSyn14
-		 (ArrayLiteral happy_var_2
+		 (ArrayLiteral (reverse happy_var_2)
 	)
 happyReduction_42 _ _ _  = notHappyAtAll 
 
@@ -1605,7 +1605,7 @@ happyReduce_54 = happySpecReduce_2  18 happyReduction_54
 happyReduction_54 (HappyAbsSyn16  happy_var_2)
 	(HappyAbsSyn13  happy_var_1)
 	 =  HappyAbsSyn18
-		 (FunctionBody happy_var_1 happy_var_2
+		 (FunctionBody (reverse happy_var_1) (reverse happy_var_2)
 	)
 happyReduction_54 _ _  = notHappyAtAll 
 
@@ -1629,7 +1629,7 @@ happyReduction_56 (_ `HappyStk`
 	_ `HappyStk`
 	happyRest)
 	 = HappyAbsSyn19
-		 (Function happy_var_2 happy_var_4 happy_var_7 happy_var_9
+		 (Function happy_var_2 (reverse happy_var_4) happy_var_7 happy_var_9
 	) `HappyStk` happyRest
 
 happyReduce_57 = happyReduce 9 19 happyReduction_57

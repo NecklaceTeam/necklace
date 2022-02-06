@@ -67,7 +67,7 @@ import Prelude hiding(lex)
 %left '['
      
 %%     
-Start      : Functions                                                             { AST $1 }
+Start      : Functions                                                             { AST (reverse $1) }
      
 Functions : Functions Function                                                     { $2:$1 }
           | {- empty -}                                                            { [] }
@@ -100,7 +100,7 @@ Operator   : Expression '*' Expression                                          
      
      
 Expression : Literal                                                               { LiteralExpression $1 }
-           | name '(' Expressions ')'                                              { FunctionCall $1 $3 }
+           | name '(' Expressions ')'                                              { FunctionCall $1 (reverse $3) }
            | Operator                                                              { Operation $1 }
            | '(' Expression ')'                                                    { SubExpression $2 }
            | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
@@ -119,7 +119,7 @@ Declarations : Declarations Declaration ';'                                     
      
 Literal     : intLit                                                               { IntLiteral $1 }
             | boolLit                                                              { BoolLiteral $1 }
-            | '[' Expressions ']'                                                  { ArrayLiteral $2 }
+            | '[' Expressions ']'                                                  { ArrayLiteral (reverse $2) }
           
 Statement   : if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
             | for '('Expression ',' Expression ',' Expression ')' do Body end      { ForStatement $3 $5 $7 $10}
@@ -130,17 +130,15 @@ Statement   : if Expression do Body else Body end                               
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
 
-Statements  : Statements_                                                          { reverse $1 }
-
-Statements_ : Statements_ Statement                                                { $2 : $1 }
+Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          
      
 Body        : Statements                                                           { Body $1 }
      
-FunctionBody: Declarations Statements                                              { FunctionBody $1 $2}
+FunctionBody: Declarations Statements                                              { FunctionBody (reverse $1) (reverse $2)}
             | Statements                                                           { FunctionBody [] $1}
             
-Function    : function name '('FunctionArgs')' '->' ReturnType do FunctionBody end { Function $2 $4 $7 $9 }
+Function    : function name '('FunctionArgs')' '->' ReturnType do FunctionBody end { Function $2 (reverse $4) $7 $9 }
             | function name '('')' '->' ReturnType do FunctionBody end             { Function $2 [] $6 $8 }
 
 
