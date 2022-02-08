@@ -5,7 +5,6 @@ Necklace is a tiny, imperative, statically, strongly typed language with Elixir-
 1. Install llvm9 on you linux machine
 2. If llvm-hs does not detect llvm-config-9 you can symlink it as llvm-conifg and add it to the PATH.
 
-```
 ## How to start
 You need installed llvm9 and [stack](https://docs.haskellstack.org/en/stable/README/)
 ```shell
