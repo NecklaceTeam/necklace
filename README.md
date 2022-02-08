@@ -10,7 +10,7 @@ You need installed llvm9 and [stack](https://docs.haskellstack.org/en/stable/REA
 ```shell
 $ stack install alex happy
 $ stack install
-$ stack run necklace `<file_name>.nck`
+$ stack run necklace-exe `<file_name>.nck`
 ```
 ## Rebuild lexer
 ```shell
