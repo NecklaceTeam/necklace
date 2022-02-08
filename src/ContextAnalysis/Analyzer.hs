@@ -10,6 +10,7 @@ import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
 import Data.List
+import Debug.Trace (traceShow)
 
 
 data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
@@ -75,7 +76,7 @@ analyze ctx m = runIdentity (runStateT m ctx)
 
 toExpressionType:: AST.Type -> ExpressionType
 toExpressionType AST.Int = Int
-toExpressionType AST.Bool = Int
+toExpressionType AST.Bool = Bool 
 toExpressionType (AST.Array t) = Array (toExpressionType t)
 toExpressionType (AST.Pointer t) = Pointer (toExpressionType t)
 
@@ -121,6 +122,14 @@ binaryBoolOp name l r = do
         (Bool, Bool) -> return Bool
         _ -> throwError (name ++ " has type Bool x Bool -> Bool")
 
+binaryCompOp ::String -> AST.Expression -> AST.Expression -> FunctionAnalyzer ExpressionType
+binaryCompOp name l r = do
+    lt <- expressionType l
+    rt <- expressionType r
+    case (lt,rt) of
+        (Int, Int) -> return Bool
+        _ -> throwError (name ++ " has type Int x Int -> Bool")
+
 
 
 operatorType:: AST.Operator -> FunctionAnalyzer ExpressionType
@@ -148,10 +157,10 @@ operatorType (AST.Minus l r) = binaryIntOp "Minus" l r
 operatorType (AST.Multiply l r) = binaryIntOp "Multiply" l r
 operatorType (AST.Divide l r) = binaryIntOp "Divide" l r
 operatorType (AST.Modulo l r) = binaryIntOp "Modulo" l r
-operatorType (AST.Less l r) = binaryIntOp "Less" l r
-operatorType (AST.LessEq l r) = binaryIntOp "LessEq" l r
-operatorType (AST.Greater l r) = binaryIntOp "Greater" l r
-operatorType (AST.GreaterEq l r) = binaryIntOp "GreaterEq" l r
+operatorType (AST.Less l r) = binaryCompOp "Less" l r
+operatorType (AST.LessEq l r) = binaryCompOp "LessEq" l r
+operatorType (AST.Greater l r) = binaryCompOp "Greater" l r
+operatorType (AST.GreaterEq l r) = binaryCompOp "GreaterEq" l r
 operatorType (AST.Equal l r) = binaryBoolOp "Equal" l r
 operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r
@@ -165,6 +174,7 @@ operatorType (AST.Assign n v) = do
         (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
         (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
         (a, Any) -> return a
+        (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
 
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
