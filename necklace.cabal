@@ -1,81 +1,97 @@
-cabal-version:      3.6
-name:               necklace
-version:            0.1.0.0
+cabal-version: 1.12
 
--- A short (one-line) description of the package.
--- synopsis:
+-- This file has been generated from package.yaml by hpack version 0.34.4.
+--
+-- see: https://github.com/sol/hpack
 
--- A longer description of the package.
--- description:
-
--- A URL where users can report bugs.
--- bug-reports:
-
--- The license under which the package is released.
--- license:
-author:             pagmerek
-maintainer:         p.gmerek@student.uj.edu.pl
-
+name:           necklace
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/necklace#readme>
+homepage:       https://github.com/githubuser/necklace#readme
+bug-reports:    https://github.com/githubuser/necklace/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2022 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
 extra-source-files:
     README.md
-    CHANGELOG.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/necklace
 
 library
-  build-depends:      base ^>=4.14.3.0
-                      , text
-                      , array
-                      , containers
-                      , mtl
-                      , lens
-                      , llvm-hs-pure
-                      , llvm-hs-pretty
-                      , bytestring
-                      , utf8-string
-  build-tool-depends: alex:alex
-                      , happy:happy
-  exposed-modules:    Main
-                      , Compiler.Lexer
-                      , Necklace.AST
-                      , Compiler.Parser
-                      , ContextAnalysis.Analyzer
-                      , Codegen.Codegen
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-  ghc-options: -Wall
-executable necklace_compiler
-  main-is:            Main.hs
-  other-modules: Codegen.Codegen ContextAnalysis.Analyzer Compiler.Lexer Compiler.Parser Necklace.AST
+  exposed-modules:
+      Codegen.Codegen
+      Compiler.Lexer
+      Compiler.Parser
+      ContextAnalysis.Analyzer
+      Necklace.AST
+  other-modules:
+      Paths_necklace
+  hs-source-dirs:
+      src
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , lens
+    , llvm-hs
+    , llvm-hs-pretty
+    , llvm-hs-pure
+    , mtl
+    , text
+    , utf8-string
+  default-language: Haskell2010
 
-    -- Modules included in this executable, other than Main.
-    -- other-modules:
+executable necklace-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_necklace
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , lens
+    , llvm-hs
+    , llvm-hs-pretty
+    , llvm-hs-pure
+    , mtl
+    , necklace
+    , text
+    , utf8-string
+  default-language: Haskell2010
 
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-
-  build-depends:      base ^>=4.14.3.0
-                      , text
-                      , array
-                      , containers
-                      , mtl
-                      , lens
-                      , llvm-hs-pure
-                      , llvm-hs-pretty
-                      , bytestring
-                      , utf8-string
-  build-tool-depends: alex:alex
-                      , happy:happy
-  hs-source-dirs:     src
-  default-language:   Haskell2010
-
-test-suite spec
+test-suite necklace-test
   type: exitcode-stdio-1.0
-  other-modules: LexerSpec ContextAnalyzerSpec SpecHelper
-  hs-source-dirs: test
   main-is: Spec.hs
-  build-depends: base ^>=4.14.3.0
-                 , hspec >= 2.7
-                 , hspec-discover >= 2.7
-                 , necklace
-  default-language:    Haskell2010
-  ghc-options: -Wall
-
+  other-modules:
+      ContextAnalyzerSpec
+      LexerSpec
+      SpecHelper
+      Paths_necklace
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , lens
+    , llvm-hs
+    , llvm-hs-pretty
+    , llvm-hs-pure
+    , mtl
+    , necklace
+    , text
+    , utf8-string
+  default-language: Haskell2010
