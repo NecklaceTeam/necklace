@@ -1,19 +1,23 @@
 # necklace
 Necklace is a tiny, imperative, statically, strongly typed language with Elixir-like syntax.
 
-## How to run
-```
-cabal run necklace_compiler `./<file_name>.nck`
-```
+## LLVM install
+1. Install llvm9 on you linux machine
+2. If llvm-hs does not detect llvm-config-9 you can symlink it as llvm-conifg and add it to the PATH.
 
-## Rebuild lexer
 ```
-alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
+## How to start
+You need installed llvm9 and [stack](https://docs.haskellstack.org/en/stable/README/)
+```shell
+$ stack install alex happy
+$ stack install
+$ stack run necklace `<file_name>.nck`
+```
+## Rebuild lexer
+```shell
+$ stack run alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
 ```
 ## Rebuild parser
 ```
-happy src/Compiler/Parser.y -o src/Compiler/Parser.hs
+$ stack run happy src/Compiler/Parser.y -o src/Compiler/Parser.hs
 ```
-## Tests
-You must first install required packages with ```cabal install --enable-tests```
-Then to run tests enter ```cabal test```
