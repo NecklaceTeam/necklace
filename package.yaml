@@ -28,7 +28,6 @@ dependencies:
 - lens
 - llvm-hs-pure
 - llvm-hs-pretty
-- llvm-hs
 - bytestring
 - utf8-string
 
@@ -56,3 +55,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - necklace
+    - hspec
