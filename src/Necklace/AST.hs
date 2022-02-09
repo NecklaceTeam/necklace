@@ -45,14 +45,14 @@ data Operator = UnwrapPointer Expression
                 | NotEqual Expression Expression
                 | And Expression Expression
                 | Or Expression Expression
-                | Assign String Expression deriving(Show)
+                | Assign String Expression
+                | ArrayIndex Expression Expression deriving(Show)
 
 data Expression = Operation Operator 
                 | SubExpression Expression
                 | LiteralExpression Literal 
                 | FunctionCall String [Expression]
-                | Variable String 
-                | ArrayIndex Expression Expression deriving(Show)
+                | Variable String deriving(Show)
 
 instance ErrorRepr Operator where
     typeRepr (UnwrapPointer _) = "UnwrapPointer: (Pointer Any) -> Any"

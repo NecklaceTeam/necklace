@@ -176,6 +176,14 @@ operatorType (AST.Assign n v) = do
         (a, Any) -> return a
         (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
 
+operatorType (AST.ArrayIndex a n) = do
+    varA <- expressionType a
+    valN <- expressionType n
+    case(varA, valN) of
+        (Array z, Int) -> return z
+        (Array z,_) -> throwError $ "Indexer does not evaluate to integer"
+        (_,_) -> throwError $ "[] must target Array Type"
+
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
 compareTypes re ex = do
@@ -258,7 +266,7 @@ registerVariable:: AST.Declaration -> FunctionAnalyzer ExpressionType
 registerVariable (AST.Declaration name tp) = do
     variableMap <- gets (^. registeredVariables)
     if M.member name variableMap then
-        throwError ("Variable " ++name ++" is already declared in this scope")
+        throwError ("Variable " ++ name ++" is already declared in this scope")
     else 
         (modify . over registeredVariables. M.insert name . toExpressionType) tp 
     return Any

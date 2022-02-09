@@ -97,13 +97,14 @@ Operator   : Expression '*' Expression                                          
            | '*' Expression %prec UNWRAP                                           { UnwrapPointer $2 }
            | '-' Expression %prec NEG                                              { MinusUnary $2 }
            | name '=' Expression                                                   { Assign $1 $3 }
+           | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
+
      
      
 Expression : Literal                                                               { LiteralExpression $1 }
            | name '(' Expressions ')'                                              { FunctionCall $1 (reverse $3) }
            | Operator                                                              { Operation $1 }
            | '(' Expression ')'                                                    { SubExpression $2 }
-           | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
            | name                                                                  { Variable $1 }
      
 Expressions : Expressions ',' Expression                                           { $3:$1 }
