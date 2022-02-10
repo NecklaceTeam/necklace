@@ -181,8 +181,8 @@ operatorType (AST.ArrayIndex a n) = do
     valN <- expressionType n
     case(varA, valN) of
         (Array z, Int) -> return z
-        (Array z,_) -> throwError $ "Indexer does not evaluate to integer"
-        (_,_) -> throwError $ "[] must target Array Type"
+        (Array z,_) -> throwError $ "Index expression shoud yield Int"
+        (_,_) -> throwError $ "Value is not an Array"
 
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
