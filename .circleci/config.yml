@@ -15,15 +15,8 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Load dependiencies"
-          command: |
-            cabal update
-            cabal install --only-dependencies
-            cabal install hspec-discover
-            cabal configure --enable-tests
-      - run:
           name: "Run tests"
-          command: "cabal test"
+          command: "stack test"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
