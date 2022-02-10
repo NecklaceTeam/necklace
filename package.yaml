@@ -8,7 +8,9 @@ copyright:           "2022 Author name here"
 
 extra-source-files:
 - README.md
-- ChangeLog.md
+- CHANGELOG.md
+- src/Compiler/Lexer.x
+- src/Compiler/Parser.y
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -56,3 +58,7 @@ tests:
     dependencies:
     - necklace
     - hspec
+
+build-tools: 
+  - alex
+  - happy
