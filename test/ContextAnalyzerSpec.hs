@@ -3,7 +3,7 @@ import SpecHelper ( hspec, describe, it, shouldBe, Spec )
 
 import qualified ContextAnalysis.Analyzer as ANZ
 import qualified Necklace.AST as AST
-import ContextAnalysis.Analyzer (analyzeFunction, emptyContext)
+import ContextAnalysis.Analyzer (analyzeFunction, emptyContext, validateFunction)
 
 
 spec :: Spec
@@ -68,6 +68,34 @@ spec = describe "ContextAnalysis" $ do
                     )
                   )
        analyzeFunction funcCtx (ANZ.expressionType ast) `shouldBe` (Right ANZ.Bool, funcCtx)
+
+    it "throws error on duplicate variables" $ do
+      let ast = AST.Function "test" [AST.Declaration "ab" AST.Int] (AST.ReturnType AST.Int) (AST.FunctionBody [AST.Declaration "ab" AST.Int] [AST.VoidReturnStatement])
+      fst(analyzeFunction funcCtx (validateFunction ast)) `shouldBe` Left "Variable ab is already declared in this scope"
+
+    it "throws error if array elements evaluate to different types" $ do
+      let ast = AST.SubExpression (
+              AST.LiteralExpression (
+                AST.ArrayLiteral [
+                  AST.LiteralExpression intLit, 
+                  AST.Operation (
+                          AST.And
+                            (AST.LiteralExpression boolLit)
+                            (AST.LiteralExpression boolLit)
+                            ), AST.LiteralExpression intLit]))               
+      analyzeFunction funcCtx (ANZ.expressionType ast) `shouldBe` (Left "All values in array must be of the same type", funcCtx)
+
+    it "parses correctly an array" $ do
+      let ast = AST.SubExpression (
+              AST.LiteralExpression (
+                AST.ArrayLiteral [
+                  AST.LiteralExpression boolLit, 
+                  AST.Operation (
+                          AST.And
+                            (AST.LiteralExpression boolLit)
+                            (AST.LiteralExpression boolLit)
+                            ), AST.LiteralExpression boolLit]))          
+      analyzeFunction funcCtx (ANZ.expressionType ast) `shouldBe` (Right (ANZ.Array ANZ.Bool), funcCtx)
 
 main :: IO ()
 main = hspec spec

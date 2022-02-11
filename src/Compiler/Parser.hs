@@ -207,7 +207,7 @@ action_30 _ = happyFail (happyExpListPerState 30)
 
 action_31 _ = happyReduce_6
 
-action_32 _ = happyReduce_29
+action_32 _ = happyReduce_30
 
 action_33 (25) = happyShift action_75
 action_33 (31) = happyShift action_76
@@ -251,7 +251,7 @@ action_35 (15) = happyGoto action_37
 action_35 (16) = happyGoto action_73
 action_35 _ = happyFail (happyExpListPerState 35)
 
-action_36 _ = happyReduce_27
+action_36 _ = happyReduce_28
 
 action_37 _ = happyReduce_52
 
@@ -927,7 +927,7 @@ action_110 (9) = happyGoto action_120
 action_110 (14) = happyGoto action_36
 action_110 _ = happyFail (happyExpListPerState 110)
 
-action_111 _ = happyReduce_30
+action_111 _ = happyReduce_31
 
 action_112 (22) = happyShift action_40
 action_112 (23) = happyShift action_41
@@ -1047,9 +1047,9 @@ action_120 (44) = happyShift action_88
 action_120 (45) = happyShift action_89
 action_120 _ = happyReduce_33
 
-action_121 _ = happyReduce_28
+action_121 _ = happyReduce_29
 
-action_122 _ = happyReduce_31
+action_122 _ = happyReduce_27
 
 action_123 (22) = happyShift action_40
 action_123 (23) = happyShift action_41
@@ -1369,15 +1369,25 @@ happyReduction_26 (HappyAbsSyn9  happy_var_3)
 	)
 happyReduction_26 _ _ _  = notHappyAtAll 
 
-happyReduce_27 = happySpecReduce_1  9 happyReduction_27
-happyReduction_27 (HappyAbsSyn14  happy_var_1)
+happyReduce_27 = happyReduce 4 8 happyReduction_27
+happyReduction_27 (_ `HappyStk`
+	(HappyAbsSyn9  happy_var_3) `HappyStk`
+	_ `HappyStk`
+	(HappyAbsSyn9  happy_var_1) `HappyStk`
+	happyRest)
+	 = HappyAbsSyn8
+		 (ArrayIndex happy_var_1 happy_var_3
+	) `HappyStk` happyRest
+
+happyReduce_28 = happySpecReduce_1  9 happyReduction_28
+happyReduction_28 (HappyAbsSyn14  happy_var_1)
 	 =  HappyAbsSyn9
 		 (LiteralExpression happy_var_1
 	)
-happyReduction_27 _  = notHappyAtAll 
+happyReduction_28 _  = notHappyAtAll 
 
-happyReduce_28 = happyReduce 4 9 happyReduction_28
-happyReduction_28 (_ `HappyStk`
+happyReduce_29 = happyReduce 4 9 happyReduction_29
+happyReduction_29 (_ `HappyStk`
 	(HappyAbsSyn10  happy_var_3) `HappyStk`
 	_ `HappyStk`
 	(HappyTerminal (Lexeme _ (TokenId happy_var_1))) `HappyStk`
@@ -1386,31 +1396,21 @@ happyReduction_28 (_ `HappyStk`
 		 (FunctionCall happy_var_1 (reverse happy_var_3)
 	) `HappyStk` happyRest
 
-happyReduce_29 = happySpecReduce_1  9 happyReduction_29
-happyReduction_29 (HappyAbsSyn8  happy_var_1)
+happyReduce_30 = happySpecReduce_1  9 happyReduction_30
+happyReduction_30 (HappyAbsSyn8  happy_var_1)
 	 =  HappyAbsSyn9
 		 (Operation happy_var_1
 	)
-happyReduction_29 _  = notHappyAtAll 
+happyReduction_30 _  = notHappyAtAll 
 
-happyReduce_30 = happySpecReduce_3  9 happyReduction_30
-happyReduction_30 _
+happyReduce_31 = happySpecReduce_3  9 happyReduction_31
+happyReduction_31 _
 	(HappyAbsSyn9  happy_var_2)
 	_
 	 =  HappyAbsSyn9
 		 (SubExpression happy_var_2
 	)
-happyReduction_30 _ _ _  = notHappyAtAll 
-
-happyReduce_31 = happyReduce 4 9 happyReduction_31
-happyReduction_31 (_ `HappyStk`
-	(HappyAbsSyn9  happy_var_3) `HappyStk`
-	_ `HappyStk`
-	(HappyAbsSyn9  happy_var_1) `HappyStk`
-	happyRest)
-	 = HappyAbsSyn9
-		 (ArrayIndex happy_var_1 happy_var_3
-	) `HappyStk` happyRest
+happyReduction_31 _ _ _  = notHappyAtAll 
 
 happyReduce_32 = happySpecReduce_1  9 happyReduction_32
 happyReduction_32 (HappyTerminal (Lexeme _ (TokenId happy_var_1)))

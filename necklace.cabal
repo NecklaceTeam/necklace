@@ -17,7 +17,9 @@ license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-    ChangeLog.md
+    CHANGELOG.md
+    src/Compiler/Lexer.x
+    src/Compiler/Parser.y
 
 source-repository head
   type: git
@@ -36,13 +38,15 @@ library
       Paths_necklace
   hs-source-dirs:
       src
+  build-tools:
+      alex
+    , happy
   build-depends:
       array
     , base >=4.7 && <5
     , bytestring
     , containers
     , lens
-    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
@@ -58,13 +62,15 @@ executable necklace-exe
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-tools:
+      alex
+    , happy
   build-depends:
       array
     , base >=4.7 && <5
     , bytestring
     , containers
     , lens
-    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
@@ -85,13 +91,16 @@ test-suite necklace-test
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-tools:
+      alex
+    , happy
   build-depends:
       array
     , base >=4.7 && <5
     , bytestring
     , containers
+    , hspec
     , lens
-    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
