@@ -31,6 +31,7 @@ dependencies:
 - llvm-hs
 - bytestring
 - utf8-string
+- process
 
 library:
   source-dirs: src
