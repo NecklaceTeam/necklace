@@ -211,7 +211,6 @@ validateStatement (AST.ReturnStatement expr) = do
 
 validateStatement AST.VoidReturnStatement = do
     retType <- gets (^. returnType)
-    unless False $ throwError "xDDDD"
     case retType of
         Nothing -> return Undefined
         _ -> throwError "Expected return"

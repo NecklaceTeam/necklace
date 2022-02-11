@@ -47,6 +47,7 @@ library
     , bytestring
     , containers
     , lens
+    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
@@ -71,6 +72,7 @@ executable necklace-exe
     , bytestring
     , containers
     , lens
+    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
@@ -101,6 +103,7 @@ test-suite necklace-test
     , containers
     , hspec
     , lens
+    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
