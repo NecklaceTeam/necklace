@@ -166,7 +166,7 @@ operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r
 operatorType (AST.Or l r) = binaryBoolOp "Or" l r
 operatorType (AST.Assign n v) = do
-    varT <- variableType n
+    varT <- expressionType n
     valT <- expressionType v
     case (varT, valT) of
         (Int, Int) -> return Int
@@ -181,8 +181,8 @@ operatorType (AST.ArrayIndex a n) = do
     valN <- expressionType n
     case(varA, valN) of
         (Array z, Int) -> return z
-        (Array z,_) -> throwError $ "Index expression shoud yield Int"
-        (_,_) -> throwError $ "Value is not an Array"
+        (Array z,_) -> throwError "Index expression shoud yield Int"
+        (_,_) -> throwError "Value is not an Array"
 
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
