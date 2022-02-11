@@ -2,19 +2,37 @@ module Main where
 import Compiler.Parser (parser, parse)
 import System.Environment (getArgs)
 import ContextAnalysis.Analyzer (validate)
-import Codegen.Codegen (codegen)
+import Codegen.Codegen (codegenProgram)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import System.IO (openFile, IOMode (ReadMode))
 import Debug.Trace
+import qualified Necklace.AST as NAST
+import LLVM.Pretty (ppllvm)
+import Data.Text.Lazy (toStrict)
+import System.Process (callProcess)
+
+import qualified LLVM.AST as LAST
+import qualified LLVM.Module                   as LLVM
+import           LLVM.Context                   ( withContext )
+import           LLVM.Analysis                  ( verify )
 
 
-compile :: String -> Either String T.Text
+compile :: String -> Either String LAST.Module
 compile input = do
     ast <- parse input
-    -- Left $ show ast
-    tast <- validate $ traceShow ast ast
-    return $ codegen tast
+    tast <- validate ast
+    return $ codegenProgram tast
+    
+
+llvmTypecheck :: LAST.Module -> IO ()
+llvmTypecheck modu = do
+  withContext $ \ctx -> LLVM.withModuleFromAST ctx modu
+    (\modl -> verify modl >> LLVM.writeBitcodeToFile (LLVM.File "output.ll") modl)
+
+
+toText ::  LAST.Module -> T.Text
+toText modu = toStrict . ppllvm $ modu
 
 
 main :: IO ()
@@ -24,7 +42,12 @@ main = do
     putStrLn file
     case compile file of
         Left err -> putStrLn err
-        Right lmod -> T.putStrLn lmod
+        Right lmod -> do
+            llvmTypecheck lmod
+            T.putStrLn $ toText lmod
+            callProcess "llc" ["output.ll"]
+            callProcess "gcc" ["output.s", "runtime.c", "-o", "a.out"]
+            callProcess "rm" ["output.s", "output.ll"]
 
      
 
