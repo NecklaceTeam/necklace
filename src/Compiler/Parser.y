@@ -96,7 +96,7 @@ Operator   : Expression '*' Expression                                          
            | '!' Expression                                                        { Negation $2 }
            | '*' Expression %prec UNWRAP                                           { UnwrapPointer $2 }
            | '-' Expression %prec NEG                                              { MinusUnary $2 }
-           | name '=' Expression                                                   { Assign $1 $3 }
+           | Expression '=' Expression                                             { Assign $1 $3 }
            | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
 
      

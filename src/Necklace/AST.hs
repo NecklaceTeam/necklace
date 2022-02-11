@@ -45,7 +45,7 @@ data Operator = UnwrapPointer Expression
                 | NotEqual Expression Expression
                 | And Expression Expression
                 | Or Expression Expression
-                | Assign String Expression
+                | Assign Expression Expression
                 | ArrayIndex Expression Expression deriving(Show)
 
 data Expression = Operation Operator 
