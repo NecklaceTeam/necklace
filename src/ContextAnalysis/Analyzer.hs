@@ -97,6 +97,8 @@ binaryIntOp name l r = do
     rt <- expressionType r
     case (lt,rt) of
         (Int, Int) -> return Int
+        -- TODO: refactor
+        (Pointer a, Int) -> return $ Pointer a
         _ -> throwError (name ++ " has type Int x Int -> Int")
 
 binaryBoolOp ::String -> AST.Expression -> AST.Expression -> FunctionAnalyzer ExpressionType

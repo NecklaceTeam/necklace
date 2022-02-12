@@ -55,7 +55,6 @@ toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
 toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32 
 toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1 
-toAstType (N.Pointer tp) = LTypes.ptr $ toAstType tp
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
@@ -123,12 +122,16 @@ genOperator (N.And exprL exprR) = do
   genBinaryOperator exprL exprR LInstruction.and
 genOperator (N.Or exprL exprR) = do
   genBinaryOperator exprL exprR LInstruction.or
-genOperator (N.Assign name expr) = do
+genOperator (N.Assign (N.Variable name) expr) = do
   lOp <- gets ((M.! name) . operands)
   rOp <- genExpression expr
   LInstruction.store lOp 0 rOp
   return rOp
-
+genOperator (N.Assign (N.Operation (N.UnwrapPointer ptr)) exprR) = do
+  lOp <- genExpression ptr
+  rOp <- genExpression exprR
+  LInstruction.store lOp 0 rOp
+  return rOp
 
 genExpression:: N.Expression  -> Generator LAST.Operand
 genExpression (N.Operation oper) = genOperator oper
@@ -199,6 +202,13 @@ genDeclaration (N.Declaration name tp) = do
   registerOperand name op
 
 
+genArgument:: (N.Declaration, LAST.Operand) -> Generator ()
+genArgument ((N.Declaration name tp), rOp) = do
+  lOp <- LInstruction.alloca (toAstType tp) Nothing 0
+  op <- LInstruction.store lOp 0 rOp
+  registerOperand name lOp
+
+
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
 genFunction (N.Function name params ret (N.FunctionBody dec sts)) = mdo
     registerOperandM name function
@@ -209,8 +219,9 @@ genFunction (N.Function name params ret (N.FunctionBody dec sts)) = mdo
     return ()
       where
         bodyGenerator :: [LAST.Operand] -> Generator ()
-        bodyGenerator _ = do
+        bodyGenerator paramsOp = do
           _entry <- LMonad.block `LMonad.named` toName "entry"
+          mapM_ genArgument $ zip params paramsOp
           mapM_ genDeclaration dec
           mapM_ genStatement sts
 

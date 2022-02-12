@@ -29,3 +29,15 @@ void freeBool(int* ptr)
   free(ptr); 
 }
 
+int* accessInt(int* ptr, int skip)
+{
+  return ptr + skip;
+}
+
+int accessBool(int* ptr, int skip)
+{
+  return *(ptr + skip);
+}
+
+
+

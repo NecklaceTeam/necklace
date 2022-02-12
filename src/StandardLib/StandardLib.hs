@@ -18,6 +18,12 @@ freeInt = ("freeInt", FunctionType { _arguments=[A.Pointer A.Int], _returned=Not
 freeBool:: (String, FunctionType)
 freeBool = ("freeBool", FunctionType { _arguments=[A.Pointer A.Bool], _returned=Nothing })
 
+accessInt:: (String, FunctionType)
+accessInt = ("accessInt", FunctionType { _arguments=[A.Pointer A.Int, A.Int], _returned=(Just $ A.Pointer A.Int) })
+
+accessBool:: (String, FunctionType)
+accessBool = ("accessBool", FunctionType { _arguments=[A.Pointer A.Bool, A.Int], _returned=(Just $ A.Pointer A.Bool) })
+
 builtInFunctions:: [(String, FunctionType)]
-builtInFunctions = [printInt, allocIntArray, allocBoolArray, freeInt, freeBool]
+builtInFunctions = [printInt, allocIntArray, allocBoolArray, freeInt, freeBool, accessInt, accessBool]
 
