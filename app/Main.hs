@@ -21,7 +21,7 @@ import           LLVM.Analysis                  ( verify )
 compile :: String -> Either String LAST.Module
 compile input = do
     ast <- parse input
-    tast <- validate ast
+    tast <- validate $ traceShow ast ast
     return $ codegenProgram tast
     
 
@@ -43,8 +43,8 @@ main = do
     case compile file of
         Left err -> putStrLn err
         Right lmod -> do
-            llvmTypecheck lmod
             T.putStrLn $ toText lmod
+            llvmTypecheck lmod
             callProcess "llc" ["output.ll"]
             callProcess "gcc" ["output.s", "runtime.c", "-o", "a.out"]
             callProcess "rm" ["output.s", "output.ll"]
