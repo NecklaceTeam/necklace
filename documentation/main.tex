@@ -12,44 +12,49 @@
 
 \maketitle
 \section{Abstract}
-Necklace is a tiny, imperative, statically, strongly typed language with Elixir-like syntax.
+Necklace is a experimental, tiny, imperative, statically, strongly typed language with Elixir-like syntax. Language design is centered around the changes. Language syntax allow to bind functions to the variables reacting to changes.
 
 \section{Example syntax}
-
+Language syntax allow to model some problems in a interesting manner.
+For example you can define a self sorting array.
 \begin{verbatim}
-function do_stuff(a: int, b: int) -> int do
-    return 2 + 2;
+function fixPosition (arr: *int, mod: int) -> void do
+    cont: int;
+    if (mod == 0) do
+      return;
+    end
+    
+    if (*accessInt(arr, mod) < *accessInt(arr, mod - 1)) do
+        cont = *accessInt(arr, mod);
+        *accessInt(arr, mod) = *accessInt(arr, mod - 1);
+        *accessInt(arr, mod - 1) = cont;
+    end
 end
 
-function complex -> int do
-    a: int;
-    b: int;
-    c: int;
-    d: int;
-    a = 1;
-    b = 2;
-    c = 3;
-    d = a + b + c;
-    return d;
-end
-
-function array_operations(a: *int, size: int) -> void do
+function main () -> void do
+    arr: *int;
     i: int;
-    for (i = 0; i < size; i += 1) {
-        (a + i)* +=1
-    }
-end
+   	e: int;
+    i = 0;
+    e = 10;
+    arr = allocIntArray(10);
 
-
-function main do
-    do_stuff(1, 2);
+    while (i < 10) do
+      *accessInt(arr, i) = e;
+      
+      bind *accessInt(arr, i) fixPosition
+      
+      e = e - 1;
+      i = i + 1;
+    end
+    ~~ array content is sorted
 end
 \end{verbatim}
 
 \section{Tokens}
 \subsubsection{Regular Expressions}
 \begin{verbatim}
-    @keywords = "(function|if|else|for|while|return|break|continue|->|do|end)"
+    @keywords = "(function|if|else|while|return|->|do|end)"
     @varId = "[A-Za-z][A-Za-z0-9_]*"
     @int_lit = "([0-9])+" 
     @bool_lit = "true|false"
@@ -74,13 +79,10 @@ end
 <body> &\longrightarrow \ <statement>^* \\
 <statement> &\longrightarrow \ <function\_call>; \\
     &| \ <name> \textbf{=} <expression> \textbf{;}\\ 
-    &| \ \textbf{if } <expr> \textbf{do} <body> \textbf{else} <body>  \ \textbf{end} \\
-    &| \ \textbf{for (} <expr> \textbf{,} <expr> \textbf{,} <expr> \textbf{) do} <body> \textbf{end} \\ 
-    &| \ \textbf{while} <expr> \textbf{do} <body> \textbf{end} \\
-    &| \ \textbf{return} <expr> \textbf{;} \\
+    &| \ \textbf{if } <expression> \textbf{do} <body> \textbf{else} <body>  \ \textbf{end} \\
+    &| \ \textbf{while} <expression> \textbf{do} <body> \textbf{end} \\
+    &| \ \textbf{return} <expression> \textbf{;} \\
     &| \ \textbf{return;} \\
-    &| \ \textbf{break;} \\ 
-    &| \ \textbf{continue;} \\ 
 <declaration>  &\longrightarrow \ <name> \textbf{:} <type> \textbf{;} \\
 <expression> &\longrightarrow \ <expression> <binary\_operator> <expression> \\
     &| \ <unary\_operator> <expression> \\
@@ -104,13 +106,10 @@ end
     | \ \textbf{\textgreater=} \\
 <equality\_operator> &\longrightarrow \ \textbf{==} \ | \ \textbf{!=} \\
 <conditional\_operator> &\longrightarrow \ \textbf{\&\&} \ | \ \textbf{$\mid\mid$} \\
-<function\_call> &\longrightarrow \ <function\_name> ( <expr>^* ) \\
+<function\_call> &\longrightarrow \ <function\_name> ( <expression>^* ) \\
 <function\_name> &\longrightarrow \ <name> \\
-<literal> &\longrightarrow \ <int\_literal> \ | \ <bool\_literal> | <array\_literal> \\
-<int\_literal> &\longrightarrow \ - <digit>^+|<digit>^+ \\
-<bool\_literal> &\longrightarrow \ \textbf{true} \ | \ \textbf{false} \\
-<array\_literal> &\longrightarrow \ [<expr>^*] \\
-<identifier> &\longrightarrow \ <letter> \ | \ <identifier> <letter> \ | \ <identifier><digit> \\
+<literal> &\longrightarrow \ <int\_lit> \ | \ <bool\_lit> | <array\_literal> \\
+<array\_literal> &\longrightarrow \ [<expression>^*] \\
 \end{align*}
 \subsection{Operators Precedence}
 \begin{center}
