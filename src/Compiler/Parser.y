@@ -134,7 +134,7 @@ Statement   : if Expression do Body else Body end                               
 Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          
      
-Body        : Statements                                                           { Body $1 }
+Body        : Statements                                                           { Body (reverse $1) }
      
 FunctionBody: Declarations Statements                                              { FunctionBody (reverse $1) (reverse $2)}
             | Statements                                                           { FunctionBody [] $1}
