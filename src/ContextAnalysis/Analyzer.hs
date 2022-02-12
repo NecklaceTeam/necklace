@@ -9,26 +9,11 @@ import Control.Monad.State (StateT (runStateT), gets, modify, void)
 import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
+import Control.Monad (unless)
 import Data.List
 import Debug.Trace (traceShow)
-
-
-data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
-    deriving (Show)
-
-instance Eq ExpressionType where
-  (==) Any _ = True
-  (==) _ Any = True
-  (==) Int Int = True
-  (==) Bool Bool = True
-  (==) (Array a) (Array b) = a == b
-  (==) (Pointer a) (Pointer b) = a == b
-  (==) _ _ = False
-
-
-data FunctionType = FunctionType {_arguments::[ExpressionType], _returned:: Maybe ExpressionType}
-    deriving (Eq, Show)
-makeLenses ''FunctionType
+import StandardLib.StandardLib (builtInFunctions)
+import ContextAnalysis.AnalyzerTypes
 
 
 data FunctionContext = FunctionContext { _returnType:: Maybe ExpressionType
@@ -45,7 +30,6 @@ data Context = Context { _registeredFunctions:: M.Map String FunctionType
 makeLenses ''Context
 
 
-
 emptyFunctionContext:: ExpressionType -> FunctionContext
 emptyFunctionContext Undefined = FunctionContext {
         _returnType=Nothing,
@@ -58,9 +42,10 @@ emptyFunctionContext rType = FunctionContext {
         _callableFunctions=M.empty
     }
 
+
 emptyContext:: Context
 emptyContext = Context {
-        _registeredFunctions=M.empty,
+        _registeredFunctions=(M.fromList builtInFunctions),
         _errors= []
     }
 
@@ -112,6 +97,8 @@ binaryIntOp name l r = do
     rt <- expressionType r
     case (lt,rt) of
         (Int, Int) -> return Int
+        -- TODO: refactor
+        (Pointer a, Int) -> return $ Pointer a
         _ -> throwError (name ++ " has type Int x Int -> Int")
 
 binaryBoolOp ::String -> AST.Expression -> AST.Expression -> FunctionAnalyzer ExpressionType

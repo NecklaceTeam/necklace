@@ -1,0 +1,54 @@
+function swap(a: *int, b: *int) -> void do
+  h: int;
+  h = *a;
+  *a = *b;
+  *b = h;
+  return;
+end
+
+function insertionSort(arr: *int, size: int) -> *int do
+  i: int;
+  j: int;
+
+  if (2 > size) do
+    return arr;
+  else
+    i = 1;
+    while (i < size) do
+      j = i;
+      while (j < size) do
+        if *accessInt(arr, j) < *accessInt(arr, j - 1) do
+          swap(accessInt(arr,j), accessInt(arr, j-1));
+          j = j + 1;
+        else
+          j = j + 1;
+        end
+      end
+      i = i + 1;
+    end
+    return arr;
+  end
+end
+
+
+function main () -> void do
+    c: *int;
+    i: int;
+    i = 10;
+
+    c = allocIntArray(10);
+
+    while (i >= 0) do
+      *accessInt(c, i);
+      i = i - 1;
+    end
+    
+    insertionSort(c, 10);
+    
+    i = 10;
+    while (i >= 0) do
+      printInt(*accessInt(c, i));
+      i = i - 1;
+    end
+    return;
+end

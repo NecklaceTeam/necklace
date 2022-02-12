@@ -17,6 +17,7 @@ import qualified LLVM.AST as LAST
 import qualified LLVM.AST.IntegerPredicate as IP
 
 import qualified Necklace.AST as N
+import StandardLib.StandardLib (builtInFunctions)
 import qualified Control.Monad.ST as N
 import qualified Data.ByteString.Short (toShort, ShortByteString)
 import Control.Monad.State.Lazy ()
@@ -26,6 +27,8 @@ import Data.ByteString.Short (toShort)
 import LLVM.Pretty (ppllvm)
 import Data.Text.Lazy (toStrict)
 import qualified Control.Lens as LMonad
+import qualified ContextAnalysis.AnalyzerTypes as AN 
+import Control.Lens ((^.))
 
 newtype CodegenEnv = CodegenEnv {
                     operands :: M.Map String LAST.Operand }
@@ -50,11 +53,26 @@ toName  = toShort . fromString
 toAstType:: N.Type -> LAST.Type
 toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
-
+toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32 
+toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1 
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
 returnTypeToAstType N.Void = LTypes.void
+
+-- we probably want to remove it and provide way to extern in the ast
+expressionTypeToAST:: AN.ExpressionType -> LAST.Type
+expressionTypeToAST AN.Int = LTypes.i32  
+expressionTypeToAST AN.Bool = LTypes.i1  
+expressionTypeToAST (AN.Pointer AN.Int) = LTypes.ptr LTypes.i32  
+expressionTypeToAST (AN.Pointer AN.Bool) = LTypes.ptr LTypes.i1 
+expressionTypeToAST (AN.Pointer AN.Any) = LTypes.ptr LTypes.i8 
+
+-- This one either..., TODO clean it
+returnExpressionTypeToAstType:: Maybe AN.ExpressionType -> LAST.Type
+returnExpressionTypeToAstType mex = case mex of 
+                                        Just a -> expressionTypeToAST a
+                                        Nothing -> LTypes.ptr LTypes.i8 
 
 genUnaryOperator:: N.Expression -> (LAST.Operand -> Generator LAST.Operand) -> Generator LAST.Operand
 genUnaryOperator expr genFunc = do
@@ -104,12 +122,16 @@ genOperator (N.And exprL exprR) = do
   genBinaryOperator exprL exprR LInstruction.and
 genOperator (N.Or exprL exprR) = do
   genBinaryOperator exprL exprR LInstruction.or
-genOperator (N.Assign name expr) = do
+genOperator (N.Assign (N.Variable name) expr) = do
   lOp <- gets ((M.! name) . operands)
   rOp <- genExpression expr
   LInstruction.store lOp 0 rOp
   return rOp
-
+genOperator (N.Assign (N.Operation (N.UnwrapPointer ptr)) exprR) = do
+  lOp <- genExpression ptr
+  rOp <- genExpression exprR
+  LInstruction.store lOp 0 rOp
+  return rOp
 
 genExpression:: N.Expression  -> Generator LAST.Operand
 genExpression (N.Operation oper) = genOperator oper
@@ -180,29 +202,42 @@ genDeclaration (N.Declaration name tp) = do
   registerOperand name op
 
 
+genArgument:: (N.Declaration, LAST.Operand) -> Generator ()
+genArgument ((N.Declaration name tp), rOp) = do
+  lOp <- LInstruction.alloca (toAstType tp) Nothing 0
+  op <- LInstruction.store lOp 0 rOp
+  registerOperand name lOp
+
+
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
 genFunction (N.Function name params ret (N.FunctionBody dec sts)) = mdo
     registerOperandM name function
     function <- do
+      let paramsList = map (\(N.Declaration nm tp) -> ((toAstType tp),(LModule.ParameterName $ toName nm))) params
       let astRet = returnTypeToAstType ret
-      LModule.function (LAST.mkName name) [] astRet bodyGenerator
+      LModule.function (LAST.mkName name) paramsList astRet bodyGenerator
     return ()
       where
         bodyGenerator :: [LAST.Operand] -> Generator ()
-        bodyGenerator _ = do
+        bodyGenerator paramsOp = do
           _entry <- LMonad.block `LMonad.named` toName "entry"
+          mapM_ genArgument $ zip params paramsOp
           mapM_ genDeclaration dec
           mapM_ genStatement sts
 
+
+genBuiltIn :: (String, AN.FunctionType) -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
+genBuiltIn (nm, ft) = do
+  let name = LAST.mkName nm 
+  let args = map expressionTypeToAST . (^. AN.arguments) $ ft 
+  let ret = returnExpressionTypeToAstType . (^. AN.returned) $ ft 
+  funcOp <- LModule.extern name args ret
+  registerOperandM nm funcOp
 
 codegenProgram :: N.AST -> LAST.Module
 codegenProgram (N.AST funcs) =
   flip evalState (CodegenEnv { operands = M.empty })
     $ LModule.buildModuleT (toName "necklace")
-    $ do
-        mapM_ genFunction funcs
-
-
-codegen ::  N.AST -> Text
-codegen = toStrict . ppllvm . codegenProgram
+    $ do { mapM_ genBuiltIn builtInFunctions
+         ; mapM_ genFunction funcs }
 

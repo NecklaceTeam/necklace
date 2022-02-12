@@ -31,7 +31,9 @@ library
       Compiler.Lexer
       Compiler.Parser
       ContextAnalysis.Analyzer
+      ContextAnalysis.AnalyzerTypes
       Necklace.AST
+      StandardLib.StandardLib
   other-modules:
       Paths_necklace
   hs-source-dirs:
@@ -45,9 +47,11 @@ library
     , bytestring
     , containers
     , lens
+    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
+    , process
     , text
     , utf8-string
   default-language: Haskell2010
@@ -68,10 +72,12 @@ executable necklace-exe
     , bytestring
     , containers
     , lens
+    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
     , necklace
+    , process
     , text
     , utf8-string
   default-language: Haskell2010
@@ -97,10 +103,12 @@ test-suite necklace-test
     , containers
     , hspec
     , lens
+    , llvm-hs
     , llvm-hs-pretty
     , llvm-hs-pure
     , mtl
     , necklace
+    , process
     , text
     , utf8-string
   default-language: Haskell2010
