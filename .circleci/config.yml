@@ -9,11 +9,20 @@ jobs:
     # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
     # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
     docker:
-      - image: haskell:8.10.7
+      - image: silkeh/clang:9 
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
       - checkout
+      - run:
+          name: "Run tests"
+          command: "apt-get install ghc cabal-install"
+      - run:
+          name: "Install stack"
+          command: "curl -sSL https://get.haskellstack.org/ | sh"
+      - run:
+          name: "Install dependencies"
+          command: "stack install"
       - run:
           name: "Run tests"
           command: "stack test"
