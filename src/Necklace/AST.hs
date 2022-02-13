@@ -13,6 +13,23 @@ data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression] der
 
 data Declaration = Declaration { _dname :: String, _dtype :: Type} deriving(Show)
 
+data Function = Function String [Declaration] ReturnType FunctionBody
+                deriving(Show) 
+
+data FunctionBody = FunctionBody [Declaration] [Statement] deriving(Show) 
+
+newtype Body = Body [Statement] deriving(Show)
+
+data Statement = IfElseStatement Expression Body Body
+                | ForStatement Expression Expression Expression Body
+                | ExpressionStatement Expression
+                | WhileStatement Expression Body
+                | ReturnStatement Expression
+                | VoidReturnStatement
+                | BreakStatement 
+                | ContinueStatement 
+                | BindStatement Expression Expression String deriving(Show)
+
 data Operator = UnwrapPointer Expression
                 | MinusUnary Expression
                 | Negation Expression
