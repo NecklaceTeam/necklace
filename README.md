@@ -14,9 +14,9 @@ $ stack run necklace-exe `<file_name>.nck`
 ```
 ## Rebuild lexer
 ```shell
-$ stack run alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
+alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
 ```
 ## Rebuild parser
 ```
-$ stack run happy src/Compiler/Parser.y -o src/Compiler/Parser.hs
+happy src/Compiler/Parser.y -o src/Compiler/Parser.hs
 ```
