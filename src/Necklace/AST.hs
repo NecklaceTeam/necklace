@@ -27,7 +27,8 @@ data Statement = IfElseStatement Expression Body Body
                 | ReturnStatement Expression
                 | VoidReturnStatement
                 | BreakStatement 
-                | ContinueStatement deriving(Show)
+                | ContinueStatement 
+                | BindStatement Expression Expression String deriving(Show)
 
 data Operator = UnwrapPointer Expression
                 | MinusUnary Expression
