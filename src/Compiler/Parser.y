@@ -53,6 +53,7 @@ import Prelude hiding(lex)
       return          { Lexeme _ TokenReturn }
       break           { Lexeme _ TokenBreak }
       continue        { Lexeme _ TokenContinue }
+      bind            { Lexeme _ TokenBind }
       '->'            { Lexeme _ TokenArrow }
       do              { Lexeme _ TokenDo }
       end             { Lexeme _ TokenEnd }
@@ -136,6 +137,7 @@ Statement   : if Expression do Body else Body end                               
             | return ';'                                                           { VoidReturnStatement }
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
+            | bind '(' Expression ',' Expression ','  name ')' ';'                 { BindStatement $3 $5 $7 }
 
 Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          
