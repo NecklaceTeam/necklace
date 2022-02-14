@@ -141,8 +141,8 @@ FunctionBody: Declarations Statements                                           
             
 Function    : function name '('FunctionArgs')' '->' ReturnType do FunctionBody end { Function $2 (reverse $4) $7 $9 }
             | function name '('')' '->' ReturnType do FunctionBody end             { Function $2 [] $6 $8 }
-
-
+            | function name do FunctionBody end                                    { Function $2 [] Void $4 }
+            | function name '('FunctionArgs')' do FunctionBody end                 { Function $2 (reverse $4) Void $7 }
 
 {
 lexwrap = (alexMonadScan >>= )

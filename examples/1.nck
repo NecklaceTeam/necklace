@@ -1,4 +1,4 @@
-function main () -> void do
+function main do
     a: bool;
     b: int;
 
@@ -9,5 +9,6 @@ function main () -> void do
         b = b + 1;
     end
     b = b * 5;
+    printInt(b);
     return;
 end

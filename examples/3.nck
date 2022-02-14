@@ -1,4 +1,4 @@
-function swap(a: *int, b: *int) -> void do
+function swap(a: *int, b: *int) do
   h: int;
   h = *a;
   *a = *b;
@@ -31,7 +31,7 @@ function insertionSort(arr: *int, size: int) -> *int do
 end
 
 
-function main () -> void do
+function main do
     c: *int;
     i: int;
     i = 10;

@@ -9,7 +9,7 @@ import Control.Monad.State (StateT (runStateT), gets, modify, void)
 import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import Data.List
 import Debug.Trace (traceShow)
 import StandardLib.StandardLib (builtInFunctions)
@@ -76,13 +76,12 @@ literalType (AST.IntLiteral _) = return Int
 literalType (AST.BoolLiteral _) = return Bool
 literalType (AST.ArrayLiteral []) = return (Array Any) 
 literalType (AST.ArrayLiteral [x]) = Array <$> expressionType x
-literalType (AST.ArrayLiteral (x:y:xs)) = do
+literalType (AST.ArrayLiteral (x:xs)) = do
     ft <- expressionType x
-    st <- expressionType y
-    if ft == st then
-        literalType (AST.ArrayLiteral (y:xs))
-    else
-        throwError "All values in array must be of the same type"
+    rt <- mapM expressionType xs
+    unless (all(==ft) rt) $ throwError "All values in array must be of the same type"
+    return (Array ft)
+
 
 variableType:: String -> FunctionAnalyzer ExpressionType
 variableType name = do
@@ -252,10 +251,8 @@ validateStatements sts = Any <$ mapM validateStatement sts
 registerVariable:: AST.Declaration -> FunctionAnalyzer ExpressionType
 registerVariable (AST.Declaration name tp) = do
     variableMap <- gets (^. registeredVariables)
-    if M.member name variableMap then
-        throwError ("Variable " ++ name ++" is already declared in this scope")
-    else 
-        (modify . over registeredVariables. M.insert name . toExpressionType) tp 
+    when (M.member name variableMap) $ throwError ("Variable " ++ name ++" is already declared in this scope") 
+    (modify . over registeredVariables. M.insert name . toExpressionType) tp 
     return Any
 
 cleanRegisteredVariables:: FunctionAnalyzer ExpressionType
@@ -274,6 +271,8 @@ validateFunction (AST.Function _ args rType (AST.FunctionBody dcs sts)) = do
 
 registerFunction:: AST.Function -> Analyzer ()
 registerFunction (AST.Function name args rType _) = do
+    functionMap <- gets (^. registeredFunctions)
+    when (M.member name functionMap) $ appendError ("Function " ++ name ++" is already declared in this scope") 
     let argsT = map (toExpressionType . \(AST.Declaration _ t) -> t) args
     let functionType = FunctionType argsT $ toExpressionTypeReturn rType
     (modify . over registeredFunctions. M.insert name) functionType
