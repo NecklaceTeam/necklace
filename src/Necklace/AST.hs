@@ -13,9 +13,10 @@ data Declaration = Declaration String Type deriving(Show)
 
 data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression] deriving(Show)
 
-data Function = Function String [Declaration] ReturnType FunctionBody
+data Function = Function String FunctionType FunctionBody
                 deriving(Show) 
-
+                
+data FunctionType = FunctionType [Declaration] ReturnType deriving(Show)
 data FunctionBody = FunctionBody [Declaration] [Statement] deriving(Show) 
 
 newtype Body = Body [Statement] deriving(Show)

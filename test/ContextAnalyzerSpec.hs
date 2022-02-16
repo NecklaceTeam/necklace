@@ -102,7 +102,7 @@ spec = describe "ContextAnalysis" $ do
   
   describe "duplicate names" $ do
     it "throws error on duplicate variable name" $ do
-      let ast = AST.Function "test" [AST.Declaration "ab" AST.Int] (AST.Void) (AST.FunctionBody [AST.Declaration "ab" AST.Int] [AST.VoidReturnStatement])
+      let ast = AST.Function "test" (AST.FunctionType [AST.Declaration "ab" AST.Int] (AST.Void)) (AST.FunctionBody [AST.Declaration "ab" AST.Int] [AST.VoidReturnStatement])
       fst(analyzeFunction funcCtx (validateFunction ast)) `shouldBe` Left "Variable ab is already declared in this scope"
 
 main :: IO ()
