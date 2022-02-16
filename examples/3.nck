@@ -42,7 +42,6 @@ function main do
       *accessInt(c, i);
       i = i - 1;
     end
-    
     insertionSort(c, 10);
     
     i = 10;
@@ -52,3 +51,29 @@ function main do
     end
     return;
 end
+/*
+Errors: duplicate function name and incorrect assignment. For integration tests
+function main do
+    c: *int;
+    i: int;
+    i = 10;
+    10=10
+
+    c = allocIntArray(10);
+
+    while (i >= 0) do
+      *accessInt(c, i);
+      i = i - 1;
+    end
+    *accessInt(c,i) = 10
+    insertionSort(c, 10);
+    
+    i = 10;
+    while (i >= 0) do
+      printInt(*accessInt(c, i));
+      i = i - 1;
+    end
+    return;
+  
+end
+*/

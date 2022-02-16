@@ -151,16 +151,23 @@ operatorType (AST.Equal l r) = binaryBoolOp "Equal" l r
 operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r
 operatorType (AST.Or l r) = binaryBoolOp "Or" l r
-operatorType (AST.Assign n v) = do
-    varT <- expressionType n
-    valT <- expressionType v
-    case (varT, valT) of
-        (Int, Int) -> return Int
-        (Bool, Bool) -> return Bool
-        (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
-        (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
-        (a, Any) -> return a
-        (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+operatorType (AST.Assign n v) = let
+    sharedImpl = do
+        varT <- expressionType n
+        valT <- expressionType v
+        case (varT, valT) of
+            (Int, Int) -> return Int
+            (Bool, Bool) -> return Bool
+            (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
+            (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
+            (a, Any) -> return a
+            (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+    in
+    case n of 
+      AST.Operation (AST.UnwrapPointer _) -> sharedImpl
+      AST.Operation (AST.ArrayIndex _ _) -> sharedImpl
+      AST.Variable _ -> sharedImpl
+      _ -> throwError "Incorrect assignment"
 
 operatorType (AST.ArrayIndex a n) = do
     varA <- expressionType a
