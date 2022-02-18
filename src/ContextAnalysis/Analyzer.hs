@@ -11,6 +11,7 @@ import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
 import Data.List
 import Debug.Trace (traceShow)
+import Control.Monad (unless)
 
 
 data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
@@ -76,7 +77,7 @@ analyze ctx m = runIdentity (runStateT m ctx)
 
 toExpressionType:: AST.Type -> ExpressionType
 toExpressionType AST.Int = Int
-toExpressionType AST.Bool = Bool 
+toExpressionType AST.Bool = Bool
 toExpressionType (AST.Array t) = Array (toExpressionType t)
 toExpressionType (AST.Pointer t) = Pointer (toExpressionType t)
 
@@ -89,7 +90,7 @@ toExpressionTypeReturn AST.Void = Nothing
 literalType:: AST.Literal -> FunctionAnalyzer ExpressionType
 literalType (AST.IntLiteral _) = return Int
 literalType (AST.BoolLiteral _) = return Bool
-literalType (AST.ArrayLiteral []) = return (Array Any) 
+literalType (AST.ArrayLiteral []) = return (Array Any)
 literalType (AST.ArrayLiteral [x]) = Array <$> expressionType x
 literalType (AST.ArrayLiteral (x:y:xs)) = do
     ft <- expressionType x
@@ -246,6 +247,25 @@ validateStatement (AST.ForStatement exIn exC exInc bd) = do
         throwError "For expression comparator should yield to Bool"
     else
         return Any
+validateStatement (AST.BindStatement exprPtr exprIdx func) = do
+    -- TODO refactor this
+    let errMsg = "Bind has type (Pointer b, Int, Function(Pointer b, Int) -> void)"
+    ptrType <- expressionType exprPtr
+    idxType <- expressionType exprIdx
+    rgF <- gets $ view callableFunctions
+    unless (ptrType == Pointer Any && idxType == Int) $ throwError errMsg
+    fType  <- (
+        case M.lookup func rgF of
+            Nothing -> throwError $ "Function " ++ func ++ "is not defined"
+            Just et -> return et
+        )
+    let (Pointer ptrB) = ptrType
+    void $ case (view returned fType, view arguments fType) of
+                (Nothing, [Pointer b, Int]) -> if b == ptrB then return () 
+                                               else throwError errMsg
+                _ -> throwError errMsg
+
+    return Any
 validateStatement (AST.IfElseStatement ex ifbd ebd) = do
     void $ validateBody ifbd
     void $ validateBody ebd
@@ -267,8 +287,8 @@ registerVariable (AST.Declaration name tp) = do
     variableMap <- gets (^. registeredVariables)
     if M.member name variableMap then
         throwError ("Variable " ++ name ++" is already declared in this scope")
-    else 
-        (modify . over registeredVariables. M.insert name . toExpressionType) tp 
+    else
+        (modify . over registeredVariables. M.insert name . toExpressionType) tp
     return Any
 
 cleanRegisteredVariables:: FunctionAnalyzer ExpressionType
@@ -283,7 +303,6 @@ validateFunction (AST.Function _ args rType (AST.FunctionBody dcs sts)) = do
     (modify . set returnType . toExpressionTypeReturn ) rType
     void $ validateStatements sts
     return Any
-
 
 registerFunction:: AST.Function -> Analyzer ()
 registerFunction (AST.Function name args rType _) = do
