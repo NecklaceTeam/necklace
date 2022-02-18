@@ -121,6 +121,7 @@ Declarations : Declarations Declaration ';'                                     
 Literal     : intLit                                                               { IntLiteral $1 }
             | boolLit                                                              { BoolLiteral $1 }
             | '[' Expressions ']'                                                  { ArrayLiteral (reverse $2) }
+            | Type '['Expression']'                                                { EmptyArrayLiteral $1 $3 zz}
           
 Statement   : if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
             | for '('Expression ',' Expression ',' Expression ')' do Body end      { ForStatement $3 $5 $7 $10}
