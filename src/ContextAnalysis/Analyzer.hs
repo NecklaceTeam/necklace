@@ -154,16 +154,16 @@ operatorType (AST.Equal l r) = binaryBoolOp "Equal" l r
 operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r
 operatorType (AST.Or l r) = binaryBoolOp "Or" l r
-operatorType (AST.Assign n v) = do
-        varT <- expressionType n
-        valT <- expressionType v
+operatorType (AST.Assign var val) = do
+        varT <- expressionType var
+        valT <- expressionType val
         case (varT, valT) of
-            (Int, Int) | isMutable n -> return Int
-            (Bool, Bool) | isMutable n -> return Bool
-            (Pointer a, Pointer b) | isMutable n -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
-            (Array a, Array b) | isMutable n ->  if a == b then return $ Array a else throwError "Incorrect assignment"
-            (a, Any) | isMutable n -> return a
-            (_, _) | isMutable n ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+            (Int, Int)             | isMutable var -> return Int
+            (Bool, Bool)           | isMutable var -> return Bool
+            (Pointer a, Pointer b) | isMutable var -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
+            (Array a, Array b)     | isMutable var ->  if a == b then return $ Array a else throwError "Incorrect assignment"
+            (a, Any)               | isMutable var -> return a
+            (_, _)                 | isMutable var ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
             _ -> throwError "Incorrect assignment to immutable expression"
 
 operatorType (AST.ArrayIndex a n) = do
