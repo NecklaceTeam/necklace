@@ -65,13 +65,14 @@ toExpressionType (AST.Array t) = Array (toExpressionType t)
 toExpressionType (AST.Pointer t) = Pointer (toExpressionType t)
 
 toFunctionType :: AST.FunctionType -> FunctionType
-toFunctionType (AST.FunctionType params ret) = FunctionType (map (toExpressionType . \(AST.Declaration _ t) -> t) params)  (toExpressionTypeReturn ret)
-
+toFunctionType (AST.FunctionType params ret) = FunctionType (map toDeclarationType params) (toExpressionTypeReturn ret)
 
 toExpressionTypeReturn:: AST.ReturnType  -> Maybe ExpressionType
 toExpressionTypeReturn (AST.ReturnType t) = Just $ toExpressionType t
 toExpressionTypeReturn AST.Void = Nothing
 
+toDeclarationType :: AST.Declaration -> ExpressionType
+toDeclarationType = toExpressionType . \(AST.Declaration _ t) -> t
 
 literalType:: AST.Literal -> FunctionAnalyzer ExpressionType
 literalType (AST.IntLiteral _) = return Int
@@ -153,23 +154,17 @@ operatorType (AST.Equal l r) = binaryBoolOp "Equal" l r
 operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r
 operatorType (AST.Or l r) = binaryBoolOp "Or" l r
-operatorType (AST.Assign n v) = let
-    sharedImpl = do
+operatorType (AST.Assign n v) = do
         varT <- expressionType n
         valT <- expressionType v
         case (varT, valT) of
-            (Int, Int) -> return Int
-            (Bool, Bool) -> return Bool
-            (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
-            (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
-            (a, Any) -> return a
-            (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
-    in
-    case n of
-      AST.Operation (AST.UnwrapPointer _) -> sharedImpl
-      AST.Operation (AST.ArrayIndex _ _) -> sharedImpl
-      AST.Variable _ -> sharedImpl
-      _ -> throwError "Incorrect assignment"
+            (Int, Int) | isMutable n -> return Int
+            (Bool, Bool) | isMutable n -> return Bool
+            (Pointer a, Pointer b) | isMutable n -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
+            (Array a, Array b) | isMutable n ->  if a == b then return $ Array a else throwError "Incorrect assignment"
+            (a, Any) | isMutable n -> return a
+            (_, _) | isMutable n ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+            _ -> throwError "Incorrect assignment to immutable expression"
 
 operatorType (AST.ArrayIndex a n) = do
     varA <- expressionType a
@@ -179,6 +174,12 @@ operatorType (AST.ArrayIndex a n) = do
         (Array z,_) -> throwError "Index expression shoud yield Int"
         (_,_) -> throwError "Value is not an Array"
 
+
+isMutable :: AST.Expression -> Bool 
+isMutable (AST.Operation (AST.UnwrapPointer _))= True
+isMutable (AST.Operation (AST.ArrayIndex _ _)) = True
+isMutable (AST.Variable _) = True
+isMutable _ = False
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
 compareTypes re ex = do
@@ -282,7 +283,7 @@ registerFunction:: AST.Function -> Analyzer ()
 registerFunction (AST.Function name (AST.FunctionType args rType) _) = do
     functionMap <- gets (^. registeredFunctions)
     when (M.member name functionMap) $ appendError ("Function " ++ name ++" is already declared in this scope")
-    let argsT = map (toExpressionType . \(AST.Declaration _ t) -> t) args
+    let argsT = map toDeclarationType args
     let functionType = FunctionType argsT $ toExpressionTypeReturn rType
     (modify . over registeredFunctions. M.insert name) functionType
     return ()
