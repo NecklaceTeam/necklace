@@ -32,8 +32,8 @@ import qualified ContextAnalysis.Analyzer as ANZ
 import Control.Lens ((^.), _1, view)
 import ContextAnalysis.Analyzer (expressionType)
 
-newtype CodegenEnv = CodegenEnv {
-                    operands :: M.Map String LAST.Operand }
+newtype CodegenEnv = CodegenEnv { operands :: M.Map String LAST.Operand
+                                ; bindings :: M.Map String LAST.Operand }
     deriving (Eq, Show)
 
 
@@ -219,6 +219,8 @@ genStatement (N.ReturnStatement expr) = do
   exprOp <- genExpression expr
   void $ LInstruction.ret exprOp
 genStatement N.VoidReturnStatement = void LInstruction.retVoid
+genStatement N.BindStatement exprPtr exprIdx func = do
+  x <- z
 
 
 genDeclaration:: N.Declaration -> Generator ()
