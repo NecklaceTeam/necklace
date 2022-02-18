@@ -1,29 +1,27 @@
 module StandardLib.StandardLib where
 
-import ContextAnalysis.AnalyzerTypes
-import qualified ContextAnalysis.AnalyzerTypes as A
+import Necklace.AST
 
-printInt:: (String, FunctionType)
-printInt = ("printInt", FunctionType { _arguments=[A.Int], _returned=Nothing })
+printInt :: (String, FunctionType)
+printInt = ("printInt", FunctionType [Declaration "" Int] Void)
 
-allocIntArray:: (String, FunctionType)
-allocIntArray = ("allocIntArray", FunctionType { _arguments=[A.Int], _returned=(Just $ A.Pointer A.Int) })
+allocIntArray :: (String, FunctionType)
+allocIntArray = ("allocIntArray", FunctionType [Declaration "" Int] (ReturnType(Pointer Int)))
 
-allocBoolArray:: (String, FunctionType)
-allocBoolArray = ("allocBoolArray", FunctionType { _arguments=[A.Int], _returned=(Just $ A.Pointer A.Bool) })
+allocBoolArray :: (String, FunctionType)
+allocBoolArray = ("allocBoolArray", FunctionType [Declaration "" Int] (ReturnType(Pointer Int)))
 
-freeInt:: (String, FunctionType)
-freeInt = ("freeInt", FunctionType { _arguments=[A.Pointer A.Int], _returned=Nothing })
+freeInt :: (String, FunctionType)
+freeInt = ("freeInt", FunctionType [Declaration "" (Pointer Int)] Void) 
 
-freeBool:: (String, FunctionType)
-freeBool = ("freeBool", FunctionType { _arguments=[A.Pointer A.Bool], _returned=Nothing })
+freeBool :: (String, FunctionType)
+freeBool = ("freeBool", FunctionType [Declaration "" (Pointer Bool)] Void)
 
-accessInt:: (String, FunctionType)
-accessInt = ("accessInt", FunctionType { _arguments=[A.Pointer A.Int, A.Int], _returned=(Just $ A.Pointer A.Int) })
+accessInt :: (String, FunctionType)
+accessInt = ("accessInt", FunctionType [Declaration "" (Pointer Int), Declaration "" Int] (ReturnType (Pointer Int)))
 
-accessBool:: (String, FunctionType)
-accessBool = ("accessBool", FunctionType { _arguments=[A.Pointer A.Bool, A.Int], _returned=(Just $ A.Pointer A.Bool) })
+accessBool :: (String, FunctionType)
+accessBool = ("accessBool", FunctionType [Declaration "" (Pointer Bool), Declaration "" Int] (ReturnType (Pointer Bool)))
 
-builtInFunctions:: [(String, FunctionType)]
+builtInFunctions :: [(String, FunctionType)]
 builtInFunctions = [printInt, allocIntArray, allocBoolArray, freeInt, freeBool, accessInt, accessBool]
-

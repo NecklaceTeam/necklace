@@ -1,4 +1,4 @@
-function swap(a: *int, b: *int) -> void do
+function swap(a: *int, b: *int) do
   h: int;
   h = *a;
   *a = *b;
@@ -31,7 +31,7 @@ function insertionSort(arr: *int, size: int) -> *int do
 end
 
 
-function main () -> void do
+function main do
     c: *int;
     i: int;
     i = 10;
@@ -42,7 +42,6 @@ function main () -> void do
       *accessInt(c, i);
       i = i - 1;
     end
-    
     insertionSort(c, 10);
     
     i = 10;
@@ -52,3 +51,29 @@ function main () -> void do
     end
     return;
 end
+/*
+Errors: duplicate function name and incorrect assignment. For integration tests
+function main do
+    c: *int;
+    i: int;
+    i = 10;
+    10=10
+
+    c = allocIntArray(10);
+
+    while (i >= 0) do
+      *accessInt(c, i);
+      i = i - 1;
+    end
+    *accessInt(c,i) = 10
+    insertionSort(c, 10);
+    
+    i = 10;
+    while (i >= 0) do
+      printInt(*accessInt(c, i));
+      i = i - 1;
+    end
+    return;
+  
+end
+*/

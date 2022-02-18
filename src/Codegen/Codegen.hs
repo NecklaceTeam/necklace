@@ -60,20 +60,6 @@ returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
 returnTypeToAstType N.Void = LTypes.void
 
--- we probably want to remove it and provide way to extern in the ast
-expressionTypeToAST:: AN.ExpressionType -> LAST.Type
-expressionTypeToAST AN.Int = LTypes.i32  
-expressionTypeToAST AN.Bool = LTypes.i1  
-expressionTypeToAST (AN.Pointer AN.Int) = LTypes.ptr LTypes.i32  
-expressionTypeToAST (AN.Pointer AN.Bool) = LTypes.ptr LTypes.i1 
-expressionTypeToAST (AN.Pointer AN.Any) = LTypes.ptr LTypes.i8 
-
--- This one either..., TODO clean it
-returnExpressionTypeToAstType:: Maybe AN.ExpressionType -> LAST.Type
-returnExpressionTypeToAstType mex = case mex of 
-                                        Just a -> expressionTypeToAST a
-                                        Nothing -> LTypes.ptr LTypes.i8 
-
 genUnaryOperator:: N.Expression -> (LAST.Operand -> Generator LAST.Operand) -> Generator LAST.Operand
 genUnaryOperator expr genFunc = do
   op <- genExpression expr
@@ -210,7 +196,7 @@ genArgument ((N.Declaration name tp), rOp) = do
 
 
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
-genFunction (N.Function name params ret (N.FunctionBody dec sts)) = mdo
+genFunction (N.Function name (N.FunctionType params ret) (N.FunctionBody dec sts)) = mdo
     registerOperandM name function
     function <- do
       let paramsList = map (\(N.Declaration nm tp) -> ((toAstType tp),(LModule.ParameterName $ toName nm))) params
@@ -226,12 +212,12 @@ genFunction (N.Function name params ret (N.FunctionBody dec sts)) = mdo
           mapM_ genStatement sts
 
 
-genBuiltIn :: (String, AN.FunctionType) -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
-genBuiltIn (nm, ft) = do
+genBuiltIn :: (String, N.FunctionType) -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
+genBuiltIn (nm, N.FunctionType args ret) = do
   let name = LAST.mkName nm 
-  let args = map expressionTypeToAST . (^. AN.arguments) $ ft 
-  let ret = returnExpressionTypeToAstType . (^. AN.returned) $ ft 
-  funcOp <- LModule.extern name args ret
+  let argsT = map (toAstType.(\(N.Declaration _ t) -> t)) args 
+  let retT = returnTypeToAstType ret 
+  funcOp <- LModule.extern name argsT retT
   registerOperandM nm funcOp
 
 codegenProgram :: N.AST -> LAST.Module

@@ -9,7 +9,7 @@ import Control.Monad.State (StateT (runStateT), gets, modify, void)
 import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Error (ErrorT, MonadError (throwError), runErrorT)
 import Control.Lens (makeLenses, view, over, (^.), set)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import Data.List
 import Debug.Trace (traceShow)
 import StandardLib.StandardLib (builtInFunctions)
@@ -29,7 +29,6 @@ data Context = Context { _registeredFunctions:: M.Map String FunctionType
     deriving (Eq, Show)
 makeLenses ''Context
 
-
 emptyFunctionContext:: ExpressionType -> FunctionContext
 emptyFunctionContext Undefined = FunctionContext {
         _returnType=Nothing,
@@ -45,7 +44,7 @@ emptyFunctionContext rType = FunctionContext {
 
 emptyContext:: Context
 emptyContext = Context {
-        _registeredFunctions=(M.fromList builtInFunctions),
+        _registeredFunctions=M.fromList (map (\(a,b) -> (a, toFunctionType b)) builtInFunctions),
         _errors= []
     }
 
@@ -61,28 +60,31 @@ analyze ctx m = runIdentity (runStateT m ctx)
 
 toExpressionType:: AST.Type -> ExpressionType
 toExpressionType AST.Int = Int
-toExpressionType AST.Bool = Bool 
+toExpressionType AST.Bool = Bool
 toExpressionType (AST.Array t) = Array (toExpressionType t)
 toExpressionType (AST.Pointer t) = Pointer (toExpressionType t)
 
+toFunctionType :: AST.FunctionType -> FunctionType
+toFunctionType (AST.FunctionType params ret) = FunctionType (map toDeclarationType params) (toExpressionTypeReturn ret)
 
 toExpressionTypeReturn:: AST.ReturnType  -> Maybe ExpressionType
 toExpressionTypeReturn (AST.ReturnType t) = Just $ toExpressionType t
 toExpressionTypeReturn AST.Void = Nothing
 
+toDeclarationType :: AST.Declaration -> ExpressionType
+toDeclarationType = toExpressionType . \(AST.Declaration _ t) -> t
 
 literalType:: AST.Literal -> FunctionAnalyzer ExpressionType
 literalType (AST.IntLiteral _) = return Int
 literalType (AST.BoolLiteral _) = return Bool
-literalType (AST.ArrayLiteral []) = return (Array Any) 
+literalType (AST.ArrayLiteral []) = return (Array Any)
 literalType (AST.ArrayLiteral [x]) = Array <$> expressionType x
-literalType (AST.ArrayLiteral (x:y:xs)) = do
+literalType (AST.ArrayLiteral (x:xs)) = do
     ft <- expressionType x
-    st <- expressionType y
-    if ft == st then
-        literalType (AST.ArrayLiteral (y:xs))
-    else
-        throwError "All values in array must be of the same type"
+    rt <- mapM expressionType xs
+    unless (all(==ft) rt) $ throwError "All values in array must be of the same type"
+    return (Array ft)
+
 
 variableType:: String -> FunctionAnalyzer ExpressionType
 variableType name = do
@@ -152,16 +154,17 @@ operatorType (AST.Equal l r) = binaryBoolOp "Equal" l r
 operatorType (AST.NotEqual l r) = binaryBoolOp "NotEqual" l r
 operatorType (AST.And l r) = binaryBoolOp "And" l r
 operatorType (AST.Or l r) = binaryBoolOp "Or" l r
-operatorType (AST.Assign n v) = do
-    varT <- expressionType n
-    valT <- expressionType v
-    case (varT, valT) of
-        (Int, Int) -> return Int
-        (Bool, Bool) -> return Bool
-        (Pointer a, Pointer b) -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
-        (Array a, Array b) ->  if a == b then return $ Array a else throwError "Incorrect assignment"
-        (a, Any) -> return a
-        (_, _) ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+operatorType (AST.Assign var val) = do
+        varT <- expressionType var
+        valT <- expressionType val
+        case (varT, valT) of
+            (Int, Int)             | isMutable var -> return Int
+            (Bool, Bool)           | isMutable var -> return Bool
+            (Pointer a, Pointer b) | isMutable var -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
+            (Array a, Array b)     | isMutable var ->  if a == b then return $ Array a else throwError "Incorrect assignment"
+            (a, Any)               | isMutable var -> return a
+            (_, _)                 | isMutable var ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+            _ -> throwError "Incorrect assignment to immutable expression"
 
 operatorType (AST.ArrayIndex a n) = do
     varA <- expressionType a
@@ -171,6 +174,12 @@ operatorType (AST.ArrayIndex a n) = do
         (Array z,_) -> throwError "Index expression shoud yield Int"
         (_,_) -> throwError "Value is not an Array"
 
+
+isMutable :: AST.Expression -> Bool 
+isMutable (AST.Operation (AST.UnwrapPointer _))= True
+isMutable (AST.Operation (AST.ArrayIndex _ _)) = True
+isMutable (AST.Variable _) = True
+isMutable _ = False
 
 compareTypes:: [ExpressionType] -> [ExpressionType] -> FunctionAnalyzer ExpressionType
 compareTypes re ex = do
@@ -252,10 +261,8 @@ validateStatements sts = Any <$ mapM validateStatement sts
 registerVariable:: AST.Declaration -> FunctionAnalyzer ExpressionType
 registerVariable (AST.Declaration name tp) = do
     variableMap <- gets (^. registeredVariables)
-    if M.member name variableMap then
-        throwError ("Variable " ++ name ++" is already declared in this scope")
-    else 
-        (modify . over registeredVariables. M.insert name . toExpressionType) tp 
+    when (M.member name variableMap) $ throwError ("Variable " ++ name ++" is already declared in this scope")
+    (modify . over registeredVariables. M.insert name . toExpressionType) tp
     return Any
 
 cleanRegisteredVariables:: FunctionAnalyzer ExpressionType
@@ -264,7 +271,7 @@ cleanRegisteredVariables = do
     return Any
 
 validateFunction:: AST.Function -> FunctionAnalyzer ExpressionType
-validateFunction (AST.Function _ args rType (AST.FunctionBody dcs sts)) = do
+validateFunction (AST.Function _ (AST.FunctionType args rType) (AST.FunctionBody dcs sts)) = do
     mapM_ registerVariable args
     mapM_ registerVariable dcs
     (modify . set returnType . toExpressionTypeReturn ) rType
@@ -273,8 +280,10 @@ validateFunction (AST.Function _ args rType (AST.FunctionBody dcs sts)) = do
 
 
 registerFunction:: AST.Function -> Analyzer ()
-registerFunction (AST.Function name args rType _) = do
-    let argsT = map (toExpressionType . \(AST.Declaration _ t) -> t) args
+registerFunction (AST.Function name (AST.FunctionType args rType) _) = do
+    functionMap <- gets (^. registeredFunctions)
+    when (M.member name functionMap) $ appendError ("Function " ++ name ++" is already declared in this scope")
+    let argsT = map toDeclarationType args
     let functionType = FunctionType argsT $ toExpressionTypeReturn rType
     (modify . over registeredFunctions. M.insert name) functionType
     return ()
