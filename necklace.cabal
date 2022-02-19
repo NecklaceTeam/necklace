@@ -32,6 +32,7 @@ library
       Compiler.Parser
       ContextAnalysis.Analyzer
       ContextAnalysis.AnalyzerTypes
+      FunctionBinder.Binder
       Necklace.AST
       StandardLib.StandardLib
   other-modules:
