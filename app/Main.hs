@@ -45,7 +45,7 @@ main = do
         Right lmod -> do
             T.putStrLn $ toText lmod
             llvmTypecheck lmod
-            callProcess "llc" ["output.ll"]
+            callProcess "llc-9" ["output.ll"]
             callProcess "gcc" ["output.s", "runtime.c", "-o", "a.out"]
             callProcess "rm" ["output.s", "output.ll"]
 

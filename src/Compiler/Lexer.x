@@ -44,8 +44,7 @@ tokens :-
 <0> \:                { makeLexeme TokenColon }
 <0> \[                { makeLexeme TokenSquareLeftParen }
 <0> \]                { makeLexeme TokenSquareRightParen }
-<0> toInt             { makeLexeme TokenToIntConversion }
-<0> toBool            { makeLexeme TokenToBoolConversion}
+<0> arr               { makeLexeme TokenArrayDeclaration }
 <0> @operator         { makeLexeme_string TokenOperator }
 <0> @intLit           { makeLexeme_int TokenIntLiteral }
 <0> @boolLit          { makeLexeme_bool TokenBoolLiteral }
@@ -64,8 +63,7 @@ data Token =
         TokenSquareLeftParen     |
         TokenSquareRightParen    |
         TokenSemicolon           |
-        TokenToBoolConversion    |
-        TokenToIntConversion     |
+        TokenArrayDeclaration    |
         TokenFunction            |
         TokenVoid                |
         TokenIf                  |

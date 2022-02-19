@@ -2,14 +2,12 @@ function main do
     a: [int];
     b: [int];
 
-    a = int[10];
-
+    a = arr int[10];
     b = [1,2,3,4];
-
     a[4] = 22;
 
-    printInt(b[2]);
+    printInt(b[2]); 
     printInt(a[4]);
-    
+
     return;
 end
