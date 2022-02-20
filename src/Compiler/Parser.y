@@ -42,6 +42,8 @@ import Prelude hiding(lex)
       '&&'            { Lexeme _ (TokenOperator "&&") }
       '||'            { Lexeme _ (TokenOperator "||") }
       '='             { Lexeme _ (TokenOperator "=") }
+      '>>'            { Lexeme _ (TokenOperator ">>") }
+      '<<'            { Lexeme _ (TokenOperator "<<") }
       void            { Lexeme _ TokenVoid}
       function        { Lexeme _ TokenFunction }
       if              { Lexeme _ TokenIf }
@@ -93,6 +95,8 @@ Operator   : Expression '*' Expression                                          
            | Expression '!=' Expression                                            { NotEqual $1 $3 }
            | Expression '&&' Expression                                            { And $1 $3 }
            | Expression '||' Expression                                            { Or $1 $3 }
+           | Expression '>>' Expression                                            { MoveRight $1 $3 }
+           | Expression '<<' Expression                                            { MoveLeft $1 $3 }
            | '!' Expression                                                        { Negation $2 }
            | '*' Expression %prec UNWRAP                                           { UnwrapPointer $2 }
            | '-' Expression %prec NEG                                              { MinusUnary $2 }

@@ -47,6 +47,8 @@ data Operator = UnwrapPointer Expression
                 | And Expression Expression
                 | Or Expression Expression
                 | Assign Expression Expression
+                | MoveRight Expression Expression
+                | MoveLeft Expression Expression
                 | ArrayIndex Expression Expression deriving(Show)
 
 data Expression = Operation Operator 

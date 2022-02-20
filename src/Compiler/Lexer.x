@@ -14,7 +14,7 @@ $whitechar            = [\t\n\r\v\f\ ]
 $special              = [\(\)\,\;\:\[\]]
 @keywords             = function|void|if|else|for|while|return|break|continue|"->"|do|end
 @id                   = ([a-zA-Z_][a-zA-Z0-9_]*)
-@operator             = "+"|"-"|"*"|"/"|"%"|"<"|">"|">="|"<="|"=="|"!="|"&&"|"||"|"="|"!"
+@operator             = "+"|"-"|"*"|"/"|"%"|"<"|">"|">="|"<="|"=="|"!="|"&&"|"||"|"="|"!"|">>"|"<<"
 @type                 = int|bool
 @comment              = "~~".*
 @blockComment         = ("/*"[. $whitechar]*)?"*/"
@@ -34,6 +34,7 @@ tokens :-
 <0> return            { makeLexeme TokenReturn }
 <0> break             { makeLexeme TokenBreak }
 <0> continue          { makeLexeme TokenContinue }
+<0> bind              { makeLexeme TokenBind }
 <0> "->"              { makeLexeme TokenArrow }
 <0> do                { makeLexeme TokenDo }
 <0> end               { makeLexeme TokenEnd }
@@ -44,8 +45,6 @@ tokens :-
 <0> \:                { makeLexeme TokenColon }
 <0> \[                { makeLexeme TokenSquareLeftParen }
 <0> \]                { makeLexeme TokenSquareRightParen }
-<0> toInt             { makeLexeme TokenToIntConversion }
-<0> toBool            { makeLexeme TokenToBoolConversion}
 <0> @operator         { makeLexeme_string TokenOperator }
 <0> @intLit           { makeLexeme_int TokenIntLiteral }
 <0> @boolLit          { makeLexeme_bool TokenBoolLiteral }
@@ -64,8 +63,6 @@ data Token =
         TokenSquareLeftParen     |
         TokenSquareRightParen    |
         TokenSemicolon           |
-        TokenToBoolConversion    |
-        TokenToIntConversion     |
         TokenFunction            |
         TokenVoid                |
         TokenIf                  |
@@ -75,6 +72,7 @@ data Token =
         TokenReturn              |
         TokenBreak               |
         TokenContinue            |
+        TokenBind                |
         TokenArrow               |
         TokenDo                  |
         TokenEnd                 |

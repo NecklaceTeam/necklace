@@ -28,7 +28,9 @@ import LLVM.Pretty (ppllvm)
 import Data.Text.Lazy (toStrict)
 import qualified Control.Lens as LMonad
 import qualified ContextAnalysis.AnalyzerTypes as AN 
+import qualified ContextAnalysis.Analyzer as ANZ 
 import Control.Lens ((^.))
+import ContextAnalysis.Analyzer (expressionType)
 
 newtype CodegenEnv = CodegenEnv {
                     operands :: M.Map String LAST.Operand }
@@ -59,6 +61,18 @@ toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
 returnTypeToAstType N.Void = LTypes.void
+
+expressionTypeToAstType:: AN.ExpressionType -> LAST.Type
+expressionTypeToAstType AN.Int = LTypes.i32  
+expressionTypeToAstType AN.Bool = LTypes.i1  
+expressionTypeToAstType (AN.Pointer AN.Int) = LTypes.ptr LTypes.i32  
+expressionTypeToAstType (AN.Pointer AN.Bool) = LTypes.ptr LTypes.i1 
+expressionTypeToAstType (AN.Pointer AN.Any) = LTypes.ptr LTypes.i8 
+
+getExpressionType :: N.Expression -> AN.ExpressionType 
+getExpressionType expr = tp
+  where funcCtx = ANZ.emptyFunctionContext AN.Undefined
+        (Right tp, _) = ANZ.analyzeFunction funcCtx (ANZ.expressionType expr)
 
 genUnaryOperator:: N.Expression -> (LAST.Operand -> Generator LAST.Operand) -> Generator LAST.Operand
 genUnaryOperator expr genFunc = do
@@ -118,6 +132,20 @@ genOperator (N.Assign (N.Operation (N.UnwrapPointer ptr)) exprR) = do
   rOp <- genExpression exprR
   LInstruction.store lOp 0 rOp
   return rOp
+genOperator (N.MoveRight exprL exprR) = do
+  let (AN.Pointer tp) = getExpressionType exprL
+  let lType = expressionTypeToAstType tp
+  lOp <- genExpression exprL
+  rOp <- genExpression exprR
+  LInstruction.gep lOp [rOp] 
+genOperator (N.MoveLeft exprL exprR) = do
+  let (AN.Pointer tp) = getExpressionType exprL
+  let lType = expressionTypeToAstType tp
+  lOp <- genExpression exprL
+  rOp <- genExpression exprR
+  LInstruction.gep lOp [LConstant.int32 0, rOp] 
+
+
 
 genExpression:: N.Expression  -> Generator LAST.Operand
 genExpression (N.Operation oper) = genOperator oper
