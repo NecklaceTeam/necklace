@@ -165,7 +165,18 @@ operatorType (AST.Assign var val) = do
             (a, Any)               | isMutable var -> return a
             (_, _)                 | isMutable var ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
             _ -> throwError "Incorrect assignment to immutable expression"
-
+operatorType (AST.MoveRight ptr idx) = do
+        ptrT <- expressionType ptr
+        idxT <- expressionType idx
+        case (ptrT, idxT) of
+            (Pointer a, Int) -> return $ Pointer a
+            _                -> throwError "Pointer shift has type (Pointer a) X Int -> Pointer a"
+operatorType (AST.MoveLeft ptr idx) = do
+        ptrT <- expressionType ptr
+        idxT <- expressionType idx
+        case (ptrT, idxT) of
+            (Pointer a, Int) -> return $ Pointer a
+            _                -> throwError "Pointer shift has type (Pointer a) X Int -> Pointer a"
 operatorType (AST.ArrayIndex a n) = do
     varA <- expressionType a
     valN <- expressionType n
