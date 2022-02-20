@@ -67,7 +67,7 @@ import Prelude hiding(lex)
 %left '['
      
 %%     
-Start      : Functions                                                             { AST (reverse $1) }
+Start      : Functions                                                             { AST {_functions = (reverse $1)} }
      
 Functions : Functions Function                                                     { $2:$1 }
           | {- empty -}                                                            { [] }
@@ -110,7 +110,7 @@ Expression : Literal                                                            
 Expressions : Expressions ',' Expression                                           { $3:$1 }
             | Expression                                                           { [$1] }
      
-Declaration  : name ':' Type                                                       { Declaration $1 $3 }
+Declaration  : name ':' Type                                                       { Declaration {_dname=$1, _dtype=$3} }
      
 FunctionArgs : FunctionArgs ',' Declaration                                        { $3:$1 }
              | Declaration                                                         { [$1] }
@@ -134,18 +134,18 @@ Statement   : if Expression do Body else Body end                               
 Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          
      
-Body        : Statements                                                           { Body (reverse $1) }
+Body        : Statements                                                           { Body {_bstatements = (reverse $1)} }
      
-FunctionBody: Declarations Statements                                              { FunctionBody (reverse $1) (reverse $2)}
-            | Statements                                                           { FunctionBody [] $1}
+FunctionBody: Declarations Statements                                              { FunctionBody { _fdeclarations=(reverse $1), _fstatements=(reverse $2)}}
+            | Statements                                                           { FunctionBody { _fdeclarations=[], _fstatements=(reverse $1)}}
 
-FunctionType: '('FunctionArgs')' '->' ReturnType                                   { FunctionType (reverse $2) $5 }
-            | '('FunctionArgs')'                                                   { FunctionType (reverse $2) Void}
-            | '('')' '->' ReturnType                                               { FunctionType [] $4 }
-            | '('')'                                                               { FunctionType [] Void }
-            | {- empty -}                                                          { FunctionType [] Void }
+FunctionType: '('FunctionArgs')' '->' ReturnType                                   { FunctionType {_args=(reverse $2), _rtype=$5} }
+            | '('FunctionArgs')'                                                   { FunctionType {_args=(reverse $2), _rtype=Void}}
+            | '('')' '->' ReturnType                                               { FunctionType {_args=[], _rtype=$4} }
+            | '('')'                                                               { FunctionType {_args=[], _rtype=Void} }
+            | {- empty -}                                                          { FunctionType {_args=[], _rtype=Void} }
 
-Function    : function name FunctionType do FunctionBody end                       { Function $2 $3 $5 }
+Function    : function name FunctionType do FunctionBody end                       { Function {_fname=$2, _ftype=$3, _fbody=$5} }
 
 {
 lexwrap = (alexMonadScan >>= )
