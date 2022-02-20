@@ -27,9 +27,9 @@ import Data.ByteString.Short (toShort)
 import LLVM.Pretty (ppllvm)
 import Data.Text.Lazy (toStrict)
 import qualified Control.Lens as LMonad
-import qualified ContextAnalysis.AnalyzerTypes as AN 
-import qualified ContextAnalysis.Analyzer as ANZ 
-import Control.Lens ((^.))
+import qualified ContextAnalysis.AnalyzerTypes as AN
+import qualified ContextAnalysis.Analyzer as ANZ
+import Control.Lens ((^.), _1, view)
 import ContextAnalysis.Analyzer (expressionType)
 
 newtype CodegenEnv = CodegenEnv {
@@ -55,24 +55,24 @@ toName  = toShort . fromString
 toAstType:: N.Type -> LAST.Type
 toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
-toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32 
-toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1 
+toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32
+toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
 returnTypeToAstType N.Void = LTypes.void
 
 expressionTypeToAstType:: AN.ExpressionType -> LAST.Type
-expressionTypeToAstType AN.Int = LTypes.i32  
-expressionTypeToAstType AN.Bool = LTypes.i1  
-expressionTypeToAstType (AN.Pointer AN.Int) = LTypes.ptr LTypes.i32  
-expressionTypeToAstType (AN.Pointer AN.Bool) = LTypes.ptr LTypes.i1 
-expressionTypeToAstType (AN.Pointer AN.Any) = LTypes.ptr LTypes.i8 
+expressionTypeToAstType AN.Int = LTypes.i32
+expressionTypeToAstType AN.Bool = LTypes.i1
+expressionTypeToAstType (AN.Pointer AN.Int) = LTypes.ptr LTypes.i32
+expressionTypeToAstType (AN.Pointer AN.Bool) = LTypes.ptr LTypes.i1
+expressionTypeToAstType (AN.Pointer AN.Any) = LTypes.ptr LTypes.i8
 
-getExpressionType :: N.Expression -> AN.ExpressionType 
+getExpressionType :: N.Expression -> AN.ExpressionType
 getExpressionType expr = tp
   where funcCtx = ANZ.emptyFunctionContext AN.Undefined
-        (Right tp, _) = ANZ.analyzeFunction funcCtx (ANZ.expressionType expr)
+        (Right tp) =  view _1 . ANZ.analyzeFunction funcCtx . ANZ.expressionType $ expr
 
 genUnaryOperator:: N.Expression -> (LAST.Operand -> Generator LAST.Operand) -> Generator LAST.Operand
 genUnaryOperator expr genFunc = do
@@ -137,13 +137,14 @@ genOperator (N.MoveRight exprL exprR) = do
   let lType = expressionTypeToAstType tp
   lOp <- genExpression exprL
   rOp <- genExpression exprR
-  LInstruction.gep lOp [rOp] 
+  LInstruction.gep lOp [rOp]
 genOperator (N.MoveLeft exprL exprR) = do
   let (AN.Pointer tp) = getExpressionType exprL
   let lType = expressionTypeToAstType tp
   lOp <- genExpression exprL
   rOp <- genExpression exprR
-  LInstruction.gep lOp [LConstant.int32 0, rOp] 
+  nrOp <- LInstruction.sub (LConstant.int32 0) rOp
+  LInstruction.gep lOp [nrOp]
 
 
 
@@ -211,40 +212,40 @@ genStatement N.VoidReturnStatement = void LInstruction.retVoid
 
 
 genDeclaration:: N.Declaration -> Generator ()
-genDeclaration (N.Declaration name tp) = do
-  op <- LInstruction.alloca (toAstType tp) Nothing 0
-  registerOperand name op
+genDeclaration dec = do
+  op <- LInstruction.alloca (toAstType (dec^.N.dtype)) Nothing 0
+  registerOperand (dec^.N.dname) op
 
 
 genArgument:: (N.Declaration, LAST.Operand) -> Generator ()
-genArgument ((N.Declaration name tp), rOp) = do
-  lOp <- LInstruction.alloca (toAstType tp) Nothing 0
+genArgument (dec, rOp) = do
+  lOp <- LInstruction.alloca (toAstType (dec^.N.dtype)) Nothing 0
   op <- LInstruction.store lOp 0 rOp
-  registerOperand name lOp
+  registerOperand (dec^.N.dname) lOp
 
 
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
-genFunction (N.Function name (N.FunctionType params ret) (N.FunctionBody dec sts)) = mdo
-    registerOperandM name function
+genFunction fun = mdo
+    registerOperandM (fun^.N.fname) function
     function <- do
-      let paramsList = map (\(N.Declaration nm tp) -> ((toAstType tp),(LModule.ParameterName $ toName nm))) params
-      let astRet = returnTypeToAstType ret
-      LModule.function (LAST.mkName name) paramsList astRet bodyGenerator
+      let paramsList = map (\dec -> (toAstType (dec^.N.dtype),LModule.ParameterName $ toName (dec^.N.dname))) (fun^.N.ftype.N.args)
+      let astRet = returnTypeToAstType (fun^.N.ftype.N.rtype)
+      LModule.function (LAST.mkName (fun^.N.fname)) paramsList astRet bodyGenerator
     return ()
       where
         bodyGenerator :: [LAST.Operand] -> Generator ()
         bodyGenerator paramsOp = do
           _entry <- LMonad.block `LMonad.named` toName "entry"
-          mapM_ genArgument $ zip params paramsOp
-          mapM_ genDeclaration dec
-          mapM_ genStatement sts
+          mapM_ genArgument $ zip (fun^.N.ftype.N.args) paramsOp
+          mapM_ genDeclaration (fun^.N.fbody.N.fdeclarations)
+          mapM_ genStatement (fun^.N.fbody.N.fstatements)
 
 
 genBuiltIn :: (String, N.FunctionType) -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
-genBuiltIn (nm, N.FunctionType args ret) = do
-  let name = LAST.mkName nm 
-  let argsT = map (toAstType.(\(N.Declaration _ t) -> t)) args 
-  let retT = returnTypeToAstType ret 
+genBuiltIn (nm, funcT) = do
+  let name = LAST.mkName nm
+  let argsT = map (toAstType.(^.N.dtype)) (funcT^.N.args)
+  let retT = returnTypeToAstType (funcT^.N.rtype)
   funcOp <- LModule.extern name argsT retT
   registerOperandM nm funcOp
 

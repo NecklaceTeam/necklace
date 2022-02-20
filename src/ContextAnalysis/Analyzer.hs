@@ -72,7 +72,7 @@ toExpressionTypeReturn (AST.ReturnType t) = Just $ toExpressionType t
 toExpressionTypeReturn AST.Void = Nothing
 
 toDeclarationType :: AST.Declaration -> ExpressionType
-toDeclarationType = toExpressionType . \(AST.Declaration _ t) -> t
+toDeclarationType dec = toExpressionType (dec ^. AST.dtype)
 
 literalType:: AST.Literal -> FunctionAnalyzer ExpressionType
 literalType (AST.IntLiteral _) = return Int
@@ -186,7 +186,7 @@ operatorType (AST.ArrayIndex a n) = do
         (_,_) -> throwError "Value is not an Array"
 
 
-isMutable :: AST.Expression -> Bool 
+isMutable :: AST.Expression -> Bool
 isMutable (AST.Operation (AST.UnwrapPointer _))= True
 isMutable (AST.Operation (AST.ArrayIndex _ _)) = True
 isMutable (AST.Variable _) = True
@@ -264,14 +264,16 @@ validateStatement (AST.IfElseStatement ex ifbd ebd) = do
 validateStatement _ = return Any
 
 validateBody:: AST.Body -> FunctionAnalyzer ExpressionType
-validateBody (AST.Body st) = validateStatements st
+validateBody bdy = validateStatements (bdy^.AST.bstatements)
 
 validateStatements:: [AST.Statement] -> FunctionAnalyzer ExpressionType
 validateStatements sts = Any <$ mapM validateStatement sts
 
 registerVariable:: AST.Declaration -> FunctionAnalyzer ExpressionType
-registerVariable (AST.Declaration name tp) = do
+registerVariable dec = do
     variableMap <- gets (^. registeredVariables)
+    let name = dec^.AST.dname
+    let tp = dec^.AST.dtype
     when (M.member name variableMap) $ throwError ("Variable " ++ name ++" is already declared in this scope")
     (modify . over registeredVariables. M.insert name . toExpressionType) tp
     return Any
@@ -282,20 +284,21 @@ cleanRegisteredVariables = do
     return Any
 
 validateFunction:: AST.Function -> FunctionAnalyzer ExpressionType
-validateFunction (AST.Function _ (AST.FunctionType args rType) (AST.FunctionBody dcs sts)) = do
-    mapM_ registerVariable args
-    mapM_ registerVariable dcs
-    (modify . set returnType . toExpressionTypeReturn ) rType
-    void $ validateStatements sts
+validateFunction fun = do
+    mapM_ registerVariable (fun^.AST.ftype.AST.args)
+    mapM_ registerVariable (fun^.AST.fbody.AST.fdeclarations)
+    (modify . set returnType . toExpressionTypeReturn ) (fun^.AST.ftype.AST.rtype)
+    void $ validateStatements (fun^.AST.fbody.AST.fstatements)
     return Any
 
 
 registerFunction:: AST.Function -> Analyzer ()
-registerFunction (AST.Function name (AST.FunctionType args rType) _) = do
+registerFunction fun = do
     functionMap <- gets (^. registeredFunctions)
+    let name = fun^.AST.fname
     when (M.member name functionMap) $ appendError ("Function " ++ name ++" is already declared in this scope")
-    let argsT = map toDeclarationType args
-    let functionType = FunctionType argsT $ toExpressionTypeReturn rType
+    let argsT = map toDeclarationType (fun^.AST.ftype.AST.args) 
+    let functionType = FunctionType argsT $ toExpressionTypeReturn (fun^.AST.ftype.AST.rtype)
     (modify . over registeredFunctions. M.insert name) functionType
     return ()
 
