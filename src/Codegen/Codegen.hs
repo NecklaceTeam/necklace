@@ -62,12 +62,6 @@ returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
 returnTypeToAstType N.Void = LTypes.void
 
-expressionTypeToAstType:: AN.ExpressionType -> LAST.Type
-expressionTypeToAstType AN.Int = LTypes.i32
-expressionTypeToAstType AN.Bool = LTypes.i1
-expressionTypeToAstType (AN.Pointer AN.Int) = LTypes.ptr LTypes.i32
-expressionTypeToAstType (AN.Pointer AN.Bool) = LTypes.ptr LTypes.i1
-expressionTypeToAstType (AN.Pointer AN.Any) = LTypes.ptr LTypes.i8
 
 getExpressionType :: N.Expression -> AN.ExpressionType
 getExpressionType expr = tp
@@ -133,14 +127,10 @@ genOperator (N.Assign (N.Operation (N.UnwrapPointer ptr)) exprR) = do
   LInstruction.store lOp 0 rOp
   return rOp
 genOperator (N.MoveRight exprL exprR) = do
-  let (AN.Pointer tp) = getExpressionType exprL
-  let lType = expressionTypeToAstType tp
   lOp <- genExpression exprL
   rOp <- genExpression exprR
   LInstruction.gep lOp [rOp]
 genOperator (N.MoveLeft exprL exprR) = do
-  let (AN.Pointer tp) = getExpressionType exprL
-  let lType = expressionTypeToAstType tp
   lOp <- genExpression exprL
   rOp <- genExpression exprR
   nrOp <- LInstruction.sub (LConstant.int32 0) rOp
