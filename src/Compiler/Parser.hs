@@ -1144,7 +1144,7 @@ action_131 _ = happyReduce_44
 happyReduce_1 = happySpecReduce_1  4 happyReduction_1
 happyReduction_1 (HappyAbsSyn5  happy_var_1)
 	 =  HappyAbsSyn4
-		 (AST (reverse happy_var_1)
+		 (AST {_functions = (reverse happy_var_1)}
 	)
 happyReduction_1 _  = notHappyAtAll 
 
@@ -1424,7 +1424,7 @@ happyReduction_35 (HappyAbsSyn6  happy_var_3)
 	_
 	(HappyTerminal (Lexeme _ (TokenId happy_var_1)))
 	 =  HappyAbsSyn11
-		 (Declaration happy_var_1 happy_var_3
+		 (Declaration {_dname=happy_var_1, _dtype=happy_var_3}
 	)
 happyReduction_35 _ _ _  = notHappyAtAll 
 
@@ -1581,7 +1581,7 @@ happyReduction_52 _  = notHappyAtAll
 happyReduce_53 = happySpecReduce_1  17 happyReduction_53
 happyReduction_53 (HappyAbsSyn16  happy_var_1)
 	 =  HappyAbsSyn17
-		 (Body (reverse happy_var_1)
+		 (Body {_bstatements = (reverse happy_var_1)}
 	)
 happyReduction_53 _  = notHappyAtAll 
 
@@ -1589,14 +1589,14 @@ happyReduce_54 = happySpecReduce_2  18 happyReduction_54
 happyReduction_54 (HappyAbsSyn16  happy_var_2)
 	(HappyAbsSyn13  happy_var_1)
 	 =  HappyAbsSyn18
-		 (FunctionBody (reverse happy_var_1) (reverse happy_var_2)
+		 (FunctionBody { _fdeclarations=(reverse happy_var_1), _fstatements=(reverse happy_var_2)}
 	)
 happyReduction_54 _ _  = notHappyAtAll 
 
 happyReduce_55 = happySpecReduce_1  18 happyReduction_55
 happyReduction_55 (HappyAbsSyn16  happy_var_1)
 	 =  HappyAbsSyn18
-		 (FunctionBody [] happy_var_1
+		 (FunctionBody { _fdeclarations=[], _fstatements=(reverse happy_var_1)}
 	)
 happyReduction_55 _  = notHappyAtAll 
 
@@ -1608,7 +1608,7 @@ happyReduction_56 ((HappyAbsSyn7  happy_var_5) `HappyStk`
 	_ `HappyStk`
 	happyRest)
 	 = HappyAbsSyn19
-		 (FunctionType (reverse happy_var_2) happy_var_5
+		 (FunctionType {_args=(reverse happy_var_2), _rtype=happy_var_5}
 	) `HappyStk` happyRest
 
 happyReduce_57 = happySpecReduce_3  19 happyReduction_57
@@ -1616,7 +1616,7 @@ happyReduction_57 _
 	(HappyAbsSyn12  happy_var_2)
 	_
 	 =  HappyAbsSyn19
-		 (FunctionType (reverse happy_var_2) Void
+		 (FunctionType {_args=(reverse happy_var_2), _rtype=Void}
 	)
 happyReduction_57 _ _ _  = notHappyAtAll 
 
@@ -1627,19 +1627,19 @@ happyReduction_58 ((HappyAbsSyn7  happy_var_4) `HappyStk`
 	_ `HappyStk`
 	happyRest)
 	 = HappyAbsSyn19
-		 (FunctionType [] happy_var_4
+		 (FunctionType {_args=[], _rtype=happy_var_4}
 	) `HappyStk` happyRest
 
 happyReduce_59 = happySpecReduce_2  19 happyReduction_59
 happyReduction_59 _
 	_
 	 =  HappyAbsSyn19
-		 (FunctionType [] Void
+		 (FunctionType {_args=[], _rtype=Void}
 	)
 
 happyReduce_60 = happySpecReduce_0  19 happyReduction_60
 happyReduction_60  =  HappyAbsSyn19
-		 (FunctionType [] Void
+		 (FunctionType {_args=[], _rtype=Void}
 	)
 
 happyReduce_61 = happyReduce 6 20 happyReduction_61
@@ -1651,7 +1651,7 @@ happyReduction_61 (_ `HappyStk`
 	_ `HappyStk`
 	happyRest)
 	 = HappyAbsSyn20
-		 (Function happy_var_2 happy_var_3 happy_var_5
+		 (Function {_fname=happy_var_2, _ftype=happy_var_3, _fbody=happy_var_5}
 	) `HappyStk` happyRest
 
 happyNewToken action sts stk

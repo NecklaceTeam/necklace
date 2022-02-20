@@ -1,34 +1,17 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Necklace.AST where
+import Control.Lens (makeLenses, view, over, (^.), set, makePrisms, makeClassy)
 
 class ErrorRepr t where
     typeRepr:: t -> String
-
-newtype AST = AST [Function] deriving(Show)
 
 data Type = Int | Bool | Array Type | Pointer Type deriving(Show)
 
 data ReturnType = ReturnType Type | Void deriving(Show)
 
-data Declaration = Declaration String Type deriving(Show)
-
 data Literal = IntLiteral Int | BoolLiteral Bool | ArrayLiteral [Expression] deriving(Show)
 
-data Function = Function String FunctionType FunctionBody
-                deriving(Show) 
-                
-data FunctionType = FunctionType [Declaration] ReturnType deriving(Show)
-data FunctionBody = FunctionBody [Declaration] [Statement] deriving(Show) 
-
-newtype Body = Body [Statement] deriving(Show)
-
-data Statement = IfElseStatement Expression Body Body
-                | ForStatement Expression Expression Expression Body
-                | ExpressionStatement Expression
-                | WhileStatement Expression Body
-                | ReturnStatement Expression
-                | VoidReturnStatement
-                | BreakStatement 
-                | ContinueStatement deriving(Show)
+data Declaration = Declaration { _dname :: String, _dtype :: Type} deriving(Show)
 
 data Operator = UnwrapPointer Expression
                 | MinusUnary Expression
@@ -49,11 +32,40 @@ data Operator = UnwrapPointer Expression
                 | Assign Expression Expression
                 | ArrayIndex Expression Expression deriving(Show)
 
-data Expression = Operation Operator 
+data Expression = Operation Operator
                 | SubExpression Expression
                 | LiteralExpression Literal 
-                | FunctionCall String [Expression]
+                | FunctionCall String [Expression] 
                 | Variable String deriving(Show)
+
+data Statement = IfElseStatement Expression Body Body
+                | ForStatement Expression Expression Expression Body
+                | ExpressionStatement Expression
+                | WhileStatement Expression Body
+                | ReturnStatement Expression
+                | VoidReturnStatement
+                | BreakStatement 
+                | ContinueStatement deriving(Show)
+
+data FunctionType = FunctionType { _args :: [Declaration], _rtype :: ReturnType} deriving(Show)
+
+data FunctionBody = FunctionBody { _fdeclarations :: [Declaration], _fstatements :: [Statement]} deriving(Show) 
+
+data Function = Function { _fname :: String, _ftype :: FunctionType, _fbody :: FunctionBody}
+                deriving(Show) 
+
+newtype Body = Body {_bstatements :: [Statement]} deriving(Show)
+
+newtype AST = AST { _functions :: [Function] } deriving (Show)
+
+makeLenses ''AST
+makeLenses ''Declaration
+makeLenses ''FunctionType
+makeLenses ''FunctionBody
+makeLenses ''Function
+makeLenses ''Body
+
+
 
 instance ErrorRepr Operator where
     typeRepr (UnwrapPointer _) = "UnwrapPointer: (Pointer Any) -> Any"
