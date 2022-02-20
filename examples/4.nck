@@ -16,13 +16,13 @@ function insertionSort(arr: *int, size: int) -> *int do
   else
     i = 1;
     while (i < size) do
-      key = *accessInt(arr,i);
+      key = *(arr >> i);
       j = i - 1;
-      while (j >= 0 && *accessInt(arr, j) > key) do
-        *accessInt(arr, j+1) = *accessInt(arr, j);
+      while (j >= 0 && *(arr >> j) > key) do
+        *(arr >> j+1) = *(arr >> j);
         j = j-1;
       end
-      *accessInt(arr,j+1) = key;
+      *(arr >> j+1) = key;
       i = i + 1;
     end
     return arr;
@@ -40,8 +40,8 @@ function main do
 
     c = allocIntArray(10);
     while (i < 10) do
-      *accessInt(c, i) = k;
-      printInt(*accessInt(c, i));
+      *(c >> i) = k;
+      printInt(*(c >> i));
       k = k - 1;
       i = i + 1;
     end
@@ -50,7 +50,7 @@ function main do
     i = 0;
 
     while (i < 10) do
-      printInt(*accessInt(c, i));
+      printInt(*(c >> i));
       i = i + 1;
     end
     freeInt(c);
