@@ -1,0 +1,14 @@
+function main do
+    a: bool;
+    b: int;
+
+    b = 1;
+    if a do
+        b = b - 1;
+    else
+        b = b + 1;
+    end
+    b = b * 5;
+    printInt(b);
+    return;
+end
