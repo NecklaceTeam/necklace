@@ -1,0 +1,17 @@
+function main do
+  x: int;
+  x = 10;
+
+  if x == 10 do
+    if x != 10 do
+      x = x + 1;
+    else
+      x = x + 0;
+    end
+  else
+    x = x - 1;
+  end
+
+  printInt(x);
+  return;
+end

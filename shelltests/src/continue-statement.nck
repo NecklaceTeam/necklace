@@ -1,0 +1,12 @@
+function main do
+  i: int;
+  i = 10;
+
+  while (i >= 0) do
+    if (i == 5) do
+      continue;
+    end
+    printInt(i);
+    i = i - 1;
+  end
+end

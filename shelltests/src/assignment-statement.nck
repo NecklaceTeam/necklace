@@ -1,0 +1,28 @@
+function swap(a: *int, b: *int) do
+  h: int;
+  h = *a;
+  *a = *b;
+  *b = h;
+  return;
+end
+
+function main do
+  x: int;
+  y: int;
+  temp: int;
+  
+  x = 10;
+  y = 20;
+  
+  printInt(x);
+  printInt(y);
+
+  temp = x;
+  x = y;
+  y = temp;
+
+  printInt(x);
+  printInt(y);
+
+  return;
+end
