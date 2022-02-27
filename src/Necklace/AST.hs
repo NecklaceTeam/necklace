@@ -32,7 +32,10 @@ data Operator = UnwrapPointer Expression
                 | Assign Expression Expression
                 | MoveRight Expression Expression
                 | MoveLeft Expression Expression
-                | ArrayIndex Expression Expression deriving(Show)
+                | ArrayIndex Expression Expression
+                | Alloc Allocable deriving(Show)
+
+data Allocable = ArrayMem Type Expresssion deriving(Show)
 
 data Expression = Operation Operator
                 | SubExpression Expression
