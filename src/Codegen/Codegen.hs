@@ -57,6 +57,9 @@ toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
 toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32
 toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1
+toAstType (N.Array N.Int) = LTypes.ptr LTypes.i32
+toAstType (N.Array N.Bool) = LTypes.ptr LTypes.i1
+
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
@@ -126,6 +129,13 @@ genOperator (N.Assign (N.Operation (N.UnwrapPointer ptr)) exprR) = do
   rOp <- genExpression exprR
   LInstruction.store lOp 0 rOp
   return rOp
+genOperator (N.Assign (N.Operation (N.ArrayIndex ptr n)) exprR) = do
+  lOp <- genExpression ptr
+  rOp <- genExpression exprR
+  ind <- genExpression n
+  pointer <- LInstruction.gep lOp [ind]
+  LInstruction.store pointer 0 rOp
+  return rOp
 genOperator (N.MoveRight exprL exprR) = do
   lOp <- genExpression exprL
   rOp <- genExpression exprR
@@ -135,7 +145,14 @@ genOperator (N.MoveLeft exprL exprR) = do
   rOp <- genExpression exprR
   nrOp <- LInstruction.sub (LConstant.int32 0) rOp
   LInstruction.gep lOp [nrOp]
-
+genOperator (N.Alloc (N.ArrayMem t expr)) = do
+  rOp <- genExpression expr
+  LInstruction.alloca (toAstType t) (Just rOp) 0
+genOperator (N.ArrayIndex exprL exprR) = do
+  lOp <- genExpression exprL
+  rOp <- genExpression exprR
+  mOp <- LInstruction.gep lOp [rOp]
+  LInstruction.load mOp 0
 
 
 genExpression:: N.Expression  -> Generator LAST.Operand
@@ -150,7 +167,6 @@ genExpression (N.FunctionCall name exprs) = do
   funcOp <- gets ((M.! name) . operands)
   args <- mapM (fmap (, []) . genExpression) exprs
   LInstruction.call funcOp args
--- genExpression (N.ArrayIndex name exprs) = do
 genExpression (N.Variable name) = do
   op <- gets ((M.! name) . operands)
   LInstruction.load op 0

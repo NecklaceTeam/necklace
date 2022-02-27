@@ -1,14 +1,31 @@
 function main do
     a : [int];
+    b : *int;
 
     a = alloc int[10];
+    b = allocIntArray(10);
 
     a[0] = 20;
+    *(b>>0) = 20;
+
     a[1] = 10;
-    a[3] = 0;
+    *(b>>1) = 10;
+    
+    a[3] = 2;
+    *(b>>3) = 2;
 
     printInt(a[0]);
     printInt(a[1]);
     printInt(a[2]);
+    printInt(a[3]);
+    printInt(a[200]);
+    printInt(9999999);
+    printInt(*(b>>0));
+    printInt(*(b>>1));
+    printInt(*(b>>2));
+    printInt(*(b>>3));
+    printInt(*(b>>200));
+
+
 
 end

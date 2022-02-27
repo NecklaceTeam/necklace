@@ -35,7 +35,7 @@ data Operator = UnwrapPointer Expression
                 | ArrayIndex Expression Expression
                 | Alloc Allocable deriving(Show)
 
-data Allocable = ArrayMem Type Expresssion deriving(Show)
+data Allocable = ArrayMem Type Expression deriving(Show)
 
 data Expression = Operation Operator
                 | SubExpression Expression
