@@ -1,0 +1,8 @@
+function main do
+  a: [int];
+  b: [bool];
+  a = [1,2,3,4,5];
+  a = [];
+  b = [true, false, true];
+  b = [];
+end

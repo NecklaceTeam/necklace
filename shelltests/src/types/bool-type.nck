@@ -1,0 +1,9 @@
+function main do
+  t: bool;
+  f: bool;
+  t = true;
+  f = false;
+
+  printBool(t);
+  printBool(f);
+end
