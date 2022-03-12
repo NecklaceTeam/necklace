@@ -1,0 +1,16 @@
+function f -> int do
+  a: int;
+  a = 0;
+  printInt(a);
+end
+
+function g -> bool do
+  a: bool;
+  a = true;
+  printBool(a);
+end
+
+function main do
+  f();
+  g();
+end
