@@ -20,3 +20,13 @@ alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
 ```
 happy src/Compiler/Parser.y -o src/Compiler/Parser.hs
 ```
+
+## Run shelltests
+Run all tests
+```
+./shelltest.sh
+```
+Run tests under one directory
+```
+./shelltest.sh <directory_name>
+```

@@ -4,6 +4,11 @@ shelltests_path="$(dirname $(realpath $0))/shelltests"
 src_paths="$shelltests_path/src/*"
 tests_path="$shelltests_path/tests/"
 
+if [[ $1 ]]; then
+  src_paths="$shelltests_path/src/$1/*"
+  tests_path="$shelltests_path/tests/$1/*"
+fi
+
 for src_path in $src_paths
 do
   [ -e "$src_path" ] || continue
