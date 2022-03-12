@@ -1,0 +1,8 @@
+function main do
+  a: bool;
+  b: bool;
+  a = true;
+  b = false;
+  printBool(!a);
+  printBool(!b);
+end
