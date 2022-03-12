@@ -1,0 +1,14 @@
+function main do
+  a: int;
+  b: int;
+  a = -1;
+  b = 1;
+
+  if (a > b) do
+    printInt(a);
+  end
+
+  if (b > a) do
+    printInt(b);
+  end
+end
