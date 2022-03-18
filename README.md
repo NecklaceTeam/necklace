@@ -1,6 +1,6 @@
 # Necklace
-===========
 ![issues](https://img.shields.io/bitbucket/issues/NecklaceTeam/necklace)
+
 Necklace is a tiny, imperative, statically, strongly typed language with Elixir-like syntax.
 
 ## Features
@@ -10,7 +10,6 @@ Necklace is a tiny, imperative, statically, strongly typed language with Elixir-
  - if statements
  
 ## Example code
-Necklace code should have function 'main'
 ```
 function main do
     a: bool;
@@ -24,7 +23,7 @@ function main do
     return;
 end
 ```
-You can find more examples in `examples/`
+You can find more examples in `examples/` and more detailed documentation in `documentation/docs.pdf`
 
 ## Installation guide
 ### Requirements
@@ -38,13 +37,9 @@ $ stack install alex happy
 $ stack install
 $ stack run necklace-exe `<file_name>.nck`
 ```
-### Rebuild lexer
-`stack run ...` should rebuild parser and lexer 
-```shell  
-alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
-```
-### Rebuild parser
+stack should rebuild lexer and parser on run, but if you need to do it by hand you can do
 ```shell
+alex src/Compiler/Lexer.x -o src/Compiler/Lexer.hs
 happy src/Compiler/Parser.y -o src/Compiler/Parser.hs
 ```
 
