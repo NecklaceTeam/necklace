@@ -1,4 +1,5 @@
 # Necklace
+[![NecklaceTeam](https://circleci.com/gh/NecklaceTeam/necklace.svg?style=svg&circle-token=c4e076f0d1733d0d763f31e7f852bf1fa0e2546c)](https://app.circleci.com/pipelines/github/NecklaceTeam/necklace)
 ![issues](https://img.shields.io/bitbucket/issues/NecklaceTeam/necklace)
 
 Necklace is a tiny, imperative, statically, strongly typed language with Elixir-like syntax.
@@ -24,6 +25,12 @@ function main do
 end
 ```
 You can find more examples in `examples/` and more detailed documentation in `documentation/docs.pdf`
+
+## Tests
+Test are located in `test/` dir. To run them on your machine run
+```shell
+stack test
+```
 
 ## Installation guide
 ### Requirements
