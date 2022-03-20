@@ -19,7 +19,7 @@ jobs:
           command: "apt-get update"
       - run:
           name: "Install dependencies"
-          command: "apt-get install ghc cabal-install"
+          command: "apt-get install -y ghc cabal-install"
       - run:
           name: "Install stack"
           command: "curl -sSL https://get.haskellstack.org/ | sh"
