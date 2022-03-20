@@ -15,7 +15,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Run tests"
+          name: "Load package cache"
+          command: "apt-get update"
+      - run:
+          name: "Install dependencies"
           command: "apt-get install ghc cabal-install"
       - run:
           name: "Install stack"
