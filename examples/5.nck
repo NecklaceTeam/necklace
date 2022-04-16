@@ -25,7 +25,4 @@ function main do
     printInt(*(b>>2));
     printInt(*(b>>3));
     printInt(*(b>>200));
-
-
-
 end

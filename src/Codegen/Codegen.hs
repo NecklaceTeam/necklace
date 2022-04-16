@@ -147,7 +147,11 @@ genOperator (N.MoveLeft exprL exprR) = do
   LInstruction.gep lOp [nrOp]
 genOperator (N.Alloc (N.ArrayMem t expr)) = do
   rOp <- genExpression expr
-  LInstruction.alloca (toAstType t) (Just rOp) 0
+  mallocOp <- gets ((M.! "malloca") . operands)
+  case t of
+    N.Int  -> LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 (fromIntegral 4),[])]
+    N.Bool -> LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 (fromIntegral 1),[])] 
+
 genOperator (N.ArrayIndex exprL exprR) = do
   lOp <- genExpression exprL
   rOp <- genExpression exprR

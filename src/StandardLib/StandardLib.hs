@@ -11,6 +11,9 @@ allocIntArray = ("allocIntArray", FunctionType [Declaration "" Int] (ReturnType(
 allocBoolArray :: (String, FunctionType)
 allocBoolArray = ("allocBoolArray", FunctionType [Declaration "" Int] (ReturnType(Pointer Int)))
 
+malloca :: (String, FunctionType)
+malloca = ("malloca", FunctionType [Declaration "" Int, Declaration "" Int] (ReturnType(Pointer Int)))
+
 freeInt :: (String, FunctionType)
 freeInt = ("freeInt", FunctionType [Declaration "" (Pointer Int)] Void) 
 
@@ -24,4 +27,4 @@ accessBool :: (String, FunctionType)
 accessBool = ("accessBool", FunctionType [Declaration "" (Pointer Bool), Declaration "" Int] (ReturnType (Pointer Bool)))
 
 builtInFunctions :: [(String, FunctionType)]
-builtInFunctions = [printInt, allocIntArray, allocBoolArray, freeInt, freeBool, accessInt, accessBool]
+builtInFunctions = [printInt, allocIntArray, allocBoolArray, freeInt, freeBool, accessInt, accessBool, malloca]
