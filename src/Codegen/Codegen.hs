@@ -219,7 +219,7 @@ genFunction fun = mdo
     registerOperandM (fun^.N.fname) function
     function <- do
       let paramsList = map (\dec -> (toAstType (dec^.N.dtype),LModule.ParameterName $ toName (dec^.N.dname))) (fun^.N.ftype.N.args)
-      let astRet = returnTypeToAstType (fun^.N.ftype.N.rtype)
+      let astRet = returnTypeToAstType (if (fun^.N.fname == "main") then (N.ReturnType N.Int) else (fun^.N.ftype.N.rtype))
       LModule.function (LAST.mkName (fun^.N.fname)) paramsList astRet bodyGenerator
     return ()
       where
