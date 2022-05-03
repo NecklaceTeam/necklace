@@ -5,7 +5,7 @@ import Control.Lens (makeLenses, view, over, (^.), set, makePrisms, makeClassy)
 class ErrorRepr t where
     typeRepr:: t -> String
 
-data Type = Int | Bool | Array Type | Pointer Type deriving(Show)
+data Type = Int | Bool | Array Type | Pointer Type | Any deriving(Show)
 
 data ReturnType = ReturnType Type | Void deriving(Show)
 
@@ -33,6 +33,7 @@ data Operator = UnwrapPointer Expression
                 | MoveRight Expression Expression
                 | MoveLeft Expression Expression
                 | ArrayIndex Expression Expression
+                | Free Expression
                 | Alloc Allocable deriving(Show)
 
 data Allocable = ArrayMem Type Expression deriving(Show)

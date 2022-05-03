@@ -3,7 +3,7 @@ module ContextAnalysis.AnalyzerTypes where
 
 import Control.Lens (makeLenses)
 
-data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
+data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Void | Any | Undefined
     deriving (Show)
 
 instance Eq ExpressionType where

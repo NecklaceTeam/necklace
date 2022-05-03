@@ -184,12 +184,19 @@ operatorType (AST.ArrayIndex a n) = do
         (Array z, Int) -> return z
         (Array z,_) -> throwError "Index expression should yield Int"
         _           -> throwError "Value is not an Array"
+
 operatorType (AST.Alloc (AST.ArrayMem t n)) = do
     valN <- expressionType n
     let arrT = toExpressionType t
     case (arrT, valN) of
         (arrT,Int) -> return $ Array arrT 
         _          -> throwError "Array size should yield to Int"
+
+operatorType (AST.Free arr) = do
+    arrT <- expressionType arr
+    case arrT of
+        (Array t) -> return Void
+        _         -> throwError "Pointer free has a type Pointer a -> Void"
 
 isMutable :: AST.Expression -> Bool
 isMutable (AST.Operation (AST.UnwrapPointer _))= True
