@@ -59,6 +59,7 @@ toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32
 toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1
 toAstType (N.Array N.Int) = LTypes.ptr LTypes.i32
 toAstType (N.Array N.Bool) = LTypes.ptr LTypes.i1
+toAstType (N.Pointer N.Any) = LTypes.ptr LTypes.i8
 
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
@@ -148,9 +149,21 @@ genOperator (N.MoveLeft exprL exprR) = do
 genOperator (N.Alloc (N.ArrayMem t expr)) = do
   rOp <- genExpression expr
   mallocOp <- gets ((M.! "malloca") . operands)
-  case t of
-    N.Int  -> LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 (fromIntegral 4),[])]
-    N.Bool -> LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 (fromIntegral 1),[])] 
+  case t of 
+    N.Int -> do
+      result <- LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 4,[])]
+      LInstruction.bitcast result (LTypes.ptr LTypes.i32)
+    N.Bool -> do
+      result <- LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 1,[])]
+      LInstruction.bitcast result (LTypes.ptr LTypes.i1)
+  
+
+genOperator (N.Free expr) = do
+  rOp <- genExpression expr
+  cOp <- LInstruction.bitcast rOp (LTypes.ptr LTypes.i8)
+  freeOp <- gets ((M.! "freePtr") . operands)
+  LInstruction.call freeOp [(cOp,[])]
+
 
 genOperator (N.ArrayIndex exprL exprR) = do
   lOp <- genExpression exprL
