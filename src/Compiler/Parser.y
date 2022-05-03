@@ -57,6 +57,8 @@ import Prelude hiding(lex)
       do              { Lexeme _ TokenDo }
       end             { Lexeme _ TokenEnd }
       alloc           { Lexeme _ TokenAlloc }
+      free            { Lexeme _ TokenFree }
+
 
 %right '='
 %right '>>' '<<'
@@ -66,7 +68,8 @@ import Prelude hiding(lex)
 %left '>' '<' '<=' '>='     
 %left '+' '-'     
 %left '*' '/' '%'     
-%right NEG UNWRAP '!'      
+%right NEG UNWRAP '!'
+%left free
 %left '['
      
 %%     
@@ -104,8 +107,9 @@ Operator   : Expression '*' Expression                                          
            | Expression '=' Expression                                             { Assign $1 $3 }
            | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
            | alloc Allocable                                                       { Alloc $2 }
+           | free Expression                                                       { Free $2 }
 
-Allocable  : Type '[' Expression ']'                                              { ArrayMem $1 $3 }
+Allocable  : Type '[' Expression ']'                                               { ArrayMem $1 $3 }
 
 Expression : Literal                                                               { LiteralExpression $1 }
            | name '(' Expressions ')'                                              { FunctionCall $1 (reverse $3) }

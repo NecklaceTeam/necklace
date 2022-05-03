@@ -39,6 +39,7 @@ tokens :-
 <0> do                { makeLexeme TokenDo }
 <0> end               { makeLexeme TokenEnd }
 <0> alloc             { makeLexeme TokenAlloc }
+<0> free              { makeLexeme TokenFree }
 <0> \(                { makeLexeme TokenLeftParen }
 <0> \)                { makeLexeme TokenRightParen }
 <0> \,                { makeLexeme TokenComma }
@@ -78,6 +79,7 @@ data Token =
         TokenDo                  |
         TokenEnd                 |
         TokenAlloc               |
+        TokenFree                |
         TokenType        String  |
         TokenOperator    String  |
         TokenBoolLiteral Bool    |
