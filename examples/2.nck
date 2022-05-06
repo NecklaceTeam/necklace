@@ -7,5 +7,5 @@ function main do
         printInt(b);
         b = b - 1;
     end
-    return 0;
+    return;
 end

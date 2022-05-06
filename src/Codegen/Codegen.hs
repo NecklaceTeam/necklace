@@ -213,13 +213,17 @@ genArgument (dec, rOp) = do
   op <- LInstruction.store lOp 0 rOp
   registerOperand (dec^.N.dname) lOp
 
+genMainStatement :: N.Statement -> Generator ()
+genMainStatement N.VoidReturnStatement = void $ LInstruction.ret (LConstant.int32 0)
+genMainStatement x = genStatement x
+
 
 genFunction :: N.Function -> (LModule.ModuleBuilderT (State CodegenEnv)) ()
 genFunction fun = mdo
     registerOperandM (fun^.N.fname) function
     function <- do
       let paramsList = map (\dec -> (toAstType (dec^.N.dtype),LModule.ParameterName $ toName (dec^.N.dname))) (fun^.N.ftype.N.args)
-      let astRet = returnTypeToAstType (if (fun^.N.fname == "main") then (N.ReturnType N.Int) else (fun^.N.ftype.N.rtype))
+      let astRet = returnTypeToAstType (if fun^.N.fname == "main" then N.ReturnType N.Int else fun^.N.ftype.N.rtype)
       LModule.function (LAST.mkName (fun^.N.fname)) paramsList astRet bodyGenerator
     return ()
       where
@@ -228,7 +232,7 @@ genFunction fun = mdo
           _entry <- LMonad.block `LMonad.named` toName "entry"
           mapM_ genArgument $ zip (fun^.N.ftype.N.args) paramsOp
           mapM_ genDeclaration (fun^.N.fbody.N.fdeclarations)
-          mapM_ genStatement (fun^.N.fbody.N.fstatements)
+          mapM_ (\st -> if fun^.N.fname == "main" then genMainStatement st else genStatement st) (fun^.N.fbody.N.fstatements)
 
 
 genBuiltIn :: (String, N.FunctionType) -> (LModule.ModuleBuilderT (State CodegenEnv)) ()

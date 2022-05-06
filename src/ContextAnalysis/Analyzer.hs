@@ -288,8 +288,7 @@ validateFunction fun = do
     mapM_ registerVariable (fun^.AST.ftype.AST.args)
     mapM_ registerVariable (fun^.AST.fbody.AST.fdeclarations)
     let name = fun^.AST.fname
-    let rType = if name == "main" then AST.ReturnType AST.Int else fun^.AST.ftype.AST.rtype
-    (modify . set returnType . toExpressionTypeReturn ) rType
+    (modify . set returnType . toExpressionTypeReturn ) (fun^.AST.ftype.AST.rtype)
     void $ validateStatements (fun^.AST.fbody.AST.fstatements)
     return Any
 
@@ -300,8 +299,7 @@ registerFunction fun = do
     let name = fun^.AST.fname
     when (M.member name functionMap) $ appendError ("Function " ++ name ++" is already declared in this scope")
     let argsT = map toDeclarationType (fun^.AST.ftype.AST.args) 
-    let rType = if name == "main" then AST.ReturnType AST.Int else fun^.AST.ftype.AST.rtype
-    let functionType = FunctionType argsT $ toExpressionTypeReturn rType
+    let functionType = FunctionType argsT $ toExpressionTypeReturn (fun^.AST.ftype.AST.rtype)
     (modify . over registeredFunctions. M.insert name) functionType
     return ()
 

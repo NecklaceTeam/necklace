@@ -54,5 +54,5 @@ function main do
       i = i + 1;
     end
     freeInt(c);
-    return 0;
+    return;
 end

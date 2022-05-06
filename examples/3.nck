@@ -49,7 +49,7 @@ function main do
       printInt(*(c >> i));
       i = i - 1;
     end
-    return 0;
+    return;
 end
 /*
 Errors: duplicate function name and incorrect assignment. For integration tests
