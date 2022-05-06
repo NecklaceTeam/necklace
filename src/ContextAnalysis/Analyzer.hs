@@ -192,12 +192,6 @@ operatorType (AST.Alloc (AST.ArrayMem t n)) = do
         (arrT,Int) -> return $ Array arrT 
         _          -> throwError "Array size should yield to Int"
 
-operatorType (AST.Free arr) = do
-    arrT <- expressionType arr
-    case arrT of
-        (Array t) -> return Void
-        _         -> throwError "Pointer free has a type Pointer a -> Void"
-
 isMutable :: AST.Expression -> Bool
 isMutable (AST.Operation (AST.UnwrapPointer _))= True
 isMutable (AST.Operation (AST.ArrayIndex _ _)) = True
@@ -273,6 +267,13 @@ validateStatement (AST.IfElseStatement ex ifbd ebd) = do
         throwError "If expression comparator should yield to Bool"
     else
         return Any
+
+validateStatement (AST.FreeStatement arr) = do
+    arrT <- expressionType arr
+    case arrT of
+        (Array t) -> return Any
+        _         -> throwError "Free expression should yield to array"
+
 validateStatement _ = return Any
 
 validateBody:: AST.Body -> FunctionAnalyzer ExpressionType

@@ -156,14 +156,6 @@ genOperator (N.Alloc (N.ArrayMem t expr)) = do
     N.Bool -> do
       result <- LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 1,[])]
       LInstruction.bitcast result (LTypes.ptr LTypes.i1)
-  
-
-genOperator (N.Free expr) = do
-  rOp <- genExpression expr
-  cOp <- LInstruction.bitcast rOp (LTypes.ptr LTypes.i8)
-  freeOp <- gets ((M.! "freePtr") . operands)
-  LInstruction.call freeOp [(cOp,[])]
-
 
 genOperator (N.ArrayIndex exprL exprR) = do
   lOp <- genExpression exprL
@@ -228,6 +220,12 @@ genStatement (N.WhileStatement expr bd) = mdo
 
 
 genStatement (N.ExpressionStatement st) = void $ genExpression st
+genStatement (N.FreeStatement expr) = do
+  rOp <- genExpression expr
+  cOp <- LInstruction.bitcast rOp (LTypes.ptr LTypes.i8)
+  freeOp <- gets ((M.! "freePtr") . operands)
+  void $ LInstruction.call freeOp [(cOp,[])]
+
 genStatement (N.ReturnStatement expr) = do
   exprOp <- genExpression expr
   void $ LInstruction.ret exprOp

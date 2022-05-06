@@ -69,7 +69,6 @@ import Prelude hiding(lex)
 %left '+' '-'     
 %left '*' '/' '%'     
 %right NEG UNWRAP '!'
-%left free
 %left '['
      
 %%     
@@ -107,7 +106,6 @@ Operator   : Expression '*' Expression                                          
            | Expression '=' Expression                                             { Assign $1 $3 }
            | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
            | alloc Allocable                                                       { Alloc $2 }
-           | free Expression                                                       { Free $2 }
 
 Allocable  : Type '[' Expression ']'                                               { ArrayMem $1 $3 }
 
@@ -140,6 +138,7 @@ Statement   : if Expression do Body else Body end                               
             | return ';'                                                           { VoidReturnStatement }
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
+            | free Expression ';'                                                  { FreeStatement $2 }
 
 Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          

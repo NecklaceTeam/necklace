@@ -33,7 +33,6 @@ data Operator = UnwrapPointer Expression
                 | MoveRight Expression Expression
                 | MoveLeft Expression Expression
                 | ArrayIndex Expression Expression
-                | Free Expression
                 | Alloc Allocable deriving(Show)
 
 data Allocable = ArrayMem Type Expression deriving(Show)
@@ -49,6 +48,7 @@ data Statement = IfElseStatement Expression Body Body
                 | ExpressionStatement Expression
                 | WhileStatement Expression Body
                 | ReturnStatement Expression
+                | FreeStatement Expression
                 | VoidReturnStatement
                 | BreakStatement 
                 | ContinueStatement deriving(Show)

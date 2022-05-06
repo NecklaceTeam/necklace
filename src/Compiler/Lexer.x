@@ -12,7 +12,7 @@ import qualified Data.Text.Lazy as T
 
 $whitechar            = [\t\n\r\v\f\ ]
 $special              = [\(\)\,\;\:\[\]]
-@keywords             = function|void|if|else|for|while|return|break|continue|"->"|do|end|alloc
+@keywords             = function|void|if|else|for|while|return|break|continue|"->"|do|end|alloc|free
 @id                   = ([a-zA-Z_][a-zA-Z0-9_]*)
 @operator             = "+"|"-"|"*"|"/"|"%"|"<"|">"|">="|"<="|"=="|"!="|"&&"|"||"|"="|"!"|">>"|"<<"
 @type                 = int|bool
