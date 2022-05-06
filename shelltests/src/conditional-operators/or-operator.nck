@@ -15,4 +15,12 @@ function main do
   if (b || false) do
     printInt(2);
   end
+
+  if (true || a) do
+    printInt(3);
+  end
+
+  if (false || b) do
+    printInt(4);
+  end
 end

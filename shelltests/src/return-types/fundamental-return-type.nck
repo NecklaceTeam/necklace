@@ -11,6 +11,11 @@ function g -> bool do
 end
 
 function main do
-  f();
-  g();
+  a: int;
+  b: bool;
+
+  a = f();
+  b = g();
+  printInt(a);
+  printBool(b);
 end

@@ -1,11 +1,3 @@
-function swap(a: *int, b: *int) do
-  h: int;
-  h = *a;
-  *a = *b;
-  *b = h;
-  return;
-end
-
 function main do
   x: int;
   y: int;
