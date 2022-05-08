@@ -63,7 +63,7 @@ end
 \section{Grammar}
 \begin{align*}
 <start> &\longrightarrow \ <function>^* \\
-<type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{[}<type>\textbf{]} \ | \ \textbf{*} <type> \\
+<type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{*} <type> \\
 <return\_type> &\longrightarrow \ <type> \ | \ \textbf{void} \\
 <function>  &\longrightarrow \\ 
     &| \ \textbf{function} <name> <arguments> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} \\
@@ -79,15 +79,12 @@ end
     &| \ \textbf{while} <expr> \textbf{do} <body> \textbf{end} \\
     &| \ \textbf{return} <expr> \textbf{;} \\
     &| \ \textbf{return;} \\
-    &| \ \textbf{break;} \\ 
-    &| \ \textbf{continue;} \\ 
 <declaration>  &\longrightarrow \ <name> \textbf{:} <type> \textbf{;} \\
 <expression> &\longrightarrow \ <expression> <binary\_operator> <expression> \\
     &| \ <unary\_operator> <expression> \\
     &| \ ( <expression> ) \\
     &| \ <function\_call> \\
     &| \ <literal> \\
-    &| \ <expression> \textbf{[} <expression> \textbf{]} \\
 <unary\_operator> &\longrightarrow \ \textbf{*} \ | \ \textbf{-} \ | \ \textbf{!} \\
 <binary\_operator> &\longrightarrow \ <arithmetic\_operator> \\ 
     &| \ <relational\_operator> \\
@@ -106,10 +103,9 @@ end
 <conditional\_operator> &\longrightarrow \ \textbf{\&\&} \ | \ \textbf{$\mid\mid$} \\
 <function\_call> &\longrightarrow \ <function\_name> ( <expr>^* ) \\
 <function\_name> &\longrightarrow \ <name> \\
-<literal> &\longrightarrow \ <int\_literal> \ | \ <bool\_literal> | <array\_literal> \\
+<literal> &\longrightarrow \ <int\_literal> \ | \ <bool\_literal> \\
 <int\_literal> &\longrightarrow \ - <digit>^+|<digit>^+ \\
 <bool\_literal> &\longrightarrow \ \textbf{true} \ | \ \textbf{false} \\
-<array\_literal> &\longrightarrow \ [<expr>^*] \\
 <identifier> &\longrightarrow \ <letter> \ | \ <identifier> <letter> \ | \ <identifier><digit> \\
 \end{align*}
 \subsection{Operators Precedence}
@@ -187,7 +183,7 @@ $$
 
 \subsubsection{'*' unary operator}
 $$
-(*): pointer \ <type> \longrightarrow <type>
+(*): pointer <type> \longrightarrow <type> 
 $$
 
 \subsubsection{'+' binary operator}
@@ -286,20 +282,15 @@ $$
 $$
 (\mid\mid): bool \times bool \longrightarrow bool
 $$
-\subsubsection{'$>>$' binary operator}
-Moves pointer by n offsets
-$$
-(>>): pointer \ <type> \times int \longrightarrow pointer \ <type>
-$$
 \subsubsection{'if' conditional operator}
 $$
 if \ bool \ do \ <block> \ end
 $$
-\subsubsection{'while' operator}
+\subsubsection{'while' binary operator}
 $$
 while \ bool \ do \ <block> \ end
 $$
-\subsubsection{'for' operator}
+\subsubsection{'for' binary operator}
 $$
 for \ <type> \ bool \ <type> \ do \ <block> \ end
 $$
