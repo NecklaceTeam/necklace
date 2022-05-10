@@ -1,0 +1,23 @@
+function f -> int do
+  a: int;
+  a = 0;
+  printInt(a);
+  return a;
+end
+
+function g -> bool do
+  a: bool;
+  a = true;
+  printBool(a);
+  return a;
+end
+
+function main do
+  a: int;
+  b: bool;
+
+  a = f();
+  b = g();
+  printInt(a);
+  printBool(b);
+end

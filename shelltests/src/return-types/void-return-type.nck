@@ -1,0 +1,19 @@
+function f -> void do
+  a: int;
+  a = 10;
+  printInt(a);
+end
+
+function g(a: int) -> void do
+  printInt(a);
+end
+
+function h(a: int) do
+  printInt(a);
+end
+
+function main do
+  f();
+  g(10);
+  h(10);
+end
