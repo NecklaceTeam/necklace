@@ -6,22 +6,32 @@ function main do
 
   if (a || b) do
     printInt(0);
+  else
+    printInt(1);
   end
 
   if (a || true) do
+    printInt(0);
+  else
     printInt(1);
   end
 
   if (b || false) do
-    printInt(2);
+    printInt(0);
+  else
+    printInt(1);
   end
 
   if (true || a) do
-    printInt(3);
+    printInt(0);
+  else
+    printInt(1);
   end
 
   if (false || b) do
-    printInt(4);
+    printInt(0);
+  else
+    printInt(1);
   end
 
   return;
