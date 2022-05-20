@@ -4,6 +4,9 @@
 \usepackage{hyperref}
 \usepackage{array}
 \allowdisplaybreaks
+\usepackage{graphicx}
+\graphicspath{ {./images/} }
+
 \title{Necklace}
 \author{Maksymilian Demitraszek, Paweł Gmerek, Michał Kuliński}
 \date{November 2021}
@@ -13,9 +16,38 @@
 \maketitle
 \section{Abstract}
 Necklace is a tiny, imperative, statically, strongly typed language with Elixir-like syntax.
+Made for Group Project 1 \& 2 at Jagiellonian University
+
+
+\section{Compiler architecture}
+\subsection{Overview}
+Necklace is a 2 phase compiler
+\begin{itemize}
+    \item Frontend - Lexer, Parser, Semantic checker
+    \item Backend - code generation to LLVM
+\end{itemize}
+\begin{center}
+    \includegraphics[scale=0.5]{compiler}
+\end{center}
+\subsection{Lexer}
+The lexer is generated using the alex library for Haskell, which provides similar interface as lex. 
+
+\subsection{Parser}
+The parser is generated using the happy library for Haskell, which provides similar interface as yacc. 
+
+
+\subsection{Semantic checker}
+The language is statically and strongly checked. The compiler will perform a semantic analysis and throw errors if any of the types are not matching. 
+
+
+
+\subsection{Code generation}
+For the generation of LLVM IR representation we use the llvm-hs library which provides bindings simplifying the LLVM code generation
+
+
 
 \section{Example syntax}
-
+Every Necklacke program needs to have a main function that returns an integer.
 \begin{verbatim}
 function do_stuff(a: int, b: int) -> int do
     return 2 + 2;
@@ -41,19 +73,20 @@ function array_operations(a: *int, size: int) -> void do
 end
 
 
-function main do
+function main -> int do
     do_stuff(1, 2);
+    return 0;
 end
 \end{verbatim}
 
 \section{Tokens}
 \subsubsection{Regular Expressions}
 \begin{verbatim}
-    @keywords = "(function|if|else|for|while|return|break|continue|->|do|end)"
+    @keywords = "(function|if|else|for|while|return|break|continue|->|do|end|alloc|free)"
     @varId = "[A-Za-z][A-Za-z0-9_]*"
     @int_lit = "([0-9])+" 
     @bool_lit = "true|false"
-    @operator = "(\+|\-|\*|\/|%|<|>|>=|<=|==|!=|&&|\|\||!|=)"
+    @operator = "(\+|\-|\*|\/|%|<|>|>=|<=|==|!=|&&|\|\||!|=|>>|<<)"
     @comment = "~~.*"
     @special = "[\(\)\,\;\:\[\]\{\}]"
     @whitechar = "[\t\n\r\v\f\ ]"
@@ -63,11 +96,14 @@ end
 \section{Grammar}
 \begin{align*}
 <start> &\longrightarrow \ <function>^* \\
-<type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{[}<type>\textbf{]} \ | \ \textbf{*} <type> \\
+<type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{*} <type> \\
 <return\_type> &\longrightarrow \ <type> \ | \ \textbf{void} \\
 <function>  &\longrightarrow \\ 
     &| \ \textbf{function} <name> <arguments> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} \\
-    &| \ \textbf{function} <name> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} \\
+    &| \ \textbf{function} <name> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} 
+    \\
+    &| \ \textbf{function} <name> <arguments> \textbf{do} \ <function\_body> \ \textbf{end} \\
+    &| \ \textbf{function} <name> <arguments> \textbf{do} \ <function\_body> \ \textbf{end} \\
 <arguments> &\longrightarrow \ \textbf{(} <function\_args>\textbf{)} \\
 <function\_args> &\longrightarrow \ <name> \textbf{:} <type> (\textbf{,} <name> \textbf{:} <type>)^* \\
 <function\_body> &\longrightarrow \ <declaration>^* <statement>^+ \\
@@ -77,17 +113,15 @@ end
     &| \ \textbf{if } <expr> \textbf{do} <body> \textbf{else} <body>  \ \textbf{end} \\
     &| \ \textbf{for (} <expr> \textbf{,} <expr> \textbf{,} <expr> \textbf{) do} <body> \textbf{end} \\ 
     &| \ \textbf{while} <expr> \textbf{do} <body> \textbf{end} \\
+    &| \ \textbf{free} <expr>;
     &| \ \textbf{return} <expr> \textbf{;} \\
     &| \ \textbf{return;} \\
-    &| \ \textbf{break;} \\ 
-    &| \ \textbf{continue;} \\ 
 <declaration>  &\longrightarrow \ <name> \textbf{:} <type> \textbf{;} \\
 <expression> &\longrightarrow \ <expression> <binary\_operator> <expression> \\
     &| \ <unary\_operator> <expression> \\
     &| \ ( <expression> ) \\
     &| \ <function\_call> \\
     &| \ <literal> \\
-    &| \ <expression> \textbf{[} <expression> \textbf{]} \\
 <unary\_operator> &\longrightarrow \ \textbf{*} \ | \ \textbf{-} \ | \ \textbf{!} \\
 <binary\_operator> &\longrightarrow \ <arithmetic\_operator> \\ 
     &| \ <relational\_operator> \\
@@ -106,10 +140,9 @@ end
 <conditional\_operator> &\longrightarrow \ \textbf{\&\&} \ | \ \textbf{$\mid\mid$} \\
 <function\_call> &\longrightarrow \ <function\_name> ( <expr>^* ) \\
 <function\_name> &\longrightarrow \ <name> \\
-<literal> &\longrightarrow \ <int\_literal> \ | \ <bool\_literal> | <array\_literal> \\
+<literal> &\longrightarrow \ <int\_literal> \ | \ <bool\_literal> \\
 <int\_literal> &\longrightarrow \ - <digit>^+|<digit>^+ \\
 <bool\_literal> &\longrightarrow \ \textbf{true} \ | \ \textbf{false} \\
-<array\_literal> &\longrightarrow \ [<expr>^*] \\
 <identifier> &\longrightarrow \ <letter> \ | \ <identifier> <letter> \ | \ <identifier><digit> \\
 \end{align*}
 \subsection{Operators Precedence}
@@ -187,7 +220,7 @@ $$
 
 \subsubsection{'*' unary operator}
 $$
-(*): pointer \ <type> \longrightarrow <type>
+(*): pointer <type> \longrightarrow <type> 
 $$
 
 \subsubsection{'+' binary operator}
@@ -286,48 +319,21 @@ $$
 $$
 (\mid\mid): bool \times bool \longrightarrow bool
 $$
-\subsubsection{'$>>$' binary operator}
-Moves pointer by n offsets
-$$
-(>>): pointer \ <type> \times int \longrightarrow pointer \ <type>
-$$
 \subsubsection{'if' conditional operator}
 $$
 if \ bool \ do \ <block> \ end
 $$
-\subsubsection{'while' operator}
+\subsubsection{'while' binary operator}
 $$
 while \ bool \ do \ <block> \ end
 $$
-\subsubsection{'for' operator}
+\subsubsection{'for' binary operator}
 $$
 for \ <type> \ bool \ <type> \ do \ <block> \ end
 $$
 
-\section{Compiler architecture}
-\subsection{Overview}
-
-\subsection{Lexer}
-The lexer is generated using the alex library for Haskell, which provides similar interface as lex. 
-
-\subsection{Parser}
-The parser is generated using the happy library for Haskell, which provides similar interface as yacc. 
-
-
-\subsection{Semantic checker}
-The language is statically and strongly checked. The compiler will perform a semantic analysis and throw errors if any of the types are not matching. 
-TODO
-1. Validate expressions and operator types
-2. validate array literals are singular type
-3. validate assignments have correct type
-4. validate if all variables are declared
-
-
-
-\subsection{Code generation}
-For the generation of LLVM IR representation we use the llvm-hs library which provides bindings simplifying the LLVM code generation
-
-
+\section{Tests}
+Necklace test suite includes unit tests for lexer and context sensitive analysis and integration tests for basic language functionalities.
 
 
 
