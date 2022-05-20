@@ -6,9 +6,25 @@ function main do
 
   if (a > b) do
     printInt(a);
+  else
+    printInt(b);
   end
 
   if (b > a) do
+    printInt(a);
+  else
+    printInt(b);
+  end
+
+  if (a > -1) do
+    printInt(a);
+  else
+    printInt(b);
+  end
+
+  if (b > 1) do
+    printInt(a);
+  else
     printInt(b);
   end
 
