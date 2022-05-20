@@ -11,4 +11,6 @@ function main do
   if (b > a) do
     printInt(b);
   end
+
+  return;
 end

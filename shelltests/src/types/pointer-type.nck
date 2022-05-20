@@ -22,4 +22,6 @@ function main do
 
   printInt(*pa);
   printInt(*pb);
+
+  return;
 end

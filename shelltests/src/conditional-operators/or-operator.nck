@@ -23,4 +23,6 @@ function main do
   if (false || b) do
     printInt(4);
   end
+
+  return;
 end

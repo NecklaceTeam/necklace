@@ -9,4 +9,6 @@ function main do
   printInt(a);
   printInt(b);
   printInt(c);
+
+  return;
 end

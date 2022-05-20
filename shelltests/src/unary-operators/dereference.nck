@@ -4,4 +4,6 @@ function main do
   a = 10;
   *pa = a;
   printInt(*pa):
+
+  return;
 end;

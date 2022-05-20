@@ -11,4 +11,6 @@ function main do
   if (a != 10) do
     printInt(b);
   end
+
+  return;
 end

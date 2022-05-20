@@ -13,5 +13,6 @@ function main do
   end
 
   printInt(x);
+
   return;
 end

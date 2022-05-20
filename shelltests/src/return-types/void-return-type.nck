@@ -2,18 +2,22 @@ function f -> void do
   a: int;
   a = 10;
   printInt(a);
+  return;
 end
 
 function g(a: int) -> void do
   printInt(a);
+  return;
 end
 
-function h(a: int) do
+function h(a: int) -> void do
   printInt(a);
+  return;
 end
 
 function main do
   f();
   g(10);
   h(10);
+  return;
 end

@@ -20,4 +20,6 @@ function main do
   b = g();
   printInt(a);
   printBool(b);
+
+  return;
 end

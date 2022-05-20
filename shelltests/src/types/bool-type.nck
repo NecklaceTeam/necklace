@@ -6,4 +6,6 @@ function main do
 
   printBool(t);
   printBool(f);
+
+  return;
 end
