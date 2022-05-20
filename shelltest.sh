@@ -13,6 +13,7 @@ for src_path in $src_paths
 do
   [ -e "$src_path" ] || continue
   if [[ -d $src_path ]]; then
+    echo "${src_path##*/}"
     nested_shelltest="${src_path}/*"
     for nested_src_path in $nested_shelltest
     do
