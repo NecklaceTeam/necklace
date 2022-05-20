@@ -6,9 +6,13 @@ function main do
 
   if (a == b) do
     printInt(a);
+  else
+    printInt(b);
   end
 
   if (a == 10) do
+    printInt(a);
+  else
     printInt(b);
   end
 
