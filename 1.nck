@@ -1,0 +1,15 @@
+function cyclic(a: int) -> int do
+    while (a > 10) do
+        a = a - 10;
+    end
+    return a;
+end
+
+function main do
+    b: int;
+    b = 5;
+    bind(b, cyclic);
+    b = b + 10;
+    printInt(b);
+    return;
+end

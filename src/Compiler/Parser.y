@@ -137,7 +137,7 @@ Statement   : if Expression do Body else Body end                               
             | return ';'                                                           { VoidReturnStatement }
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
-            | bind '(' Expression ',' Expression ','  name ')' ';'                 { BindStatement $3 $5 $7 }
+            | bind '(' name ','  name ')' ';'                                      { BindStatement $3 $5 }
 
 Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          

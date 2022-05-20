@@ -3,7 +3,7 @@ module ContextAnalysis.AnalyzerTypes where
 
 import Control.Lens (makeLenses)
 
-data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
+data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined 
     deriving (Show)
 
 instance Eq ExpressionType where
@@ -20,3 +20,4 @@ data FunctionType = FunctionType {_arguments::[ExpressionType], _returned:: Mayb
     deriving (Eq, Show)
 makeLenses ''FunctionType
 
+-- # TODO add single arg binding checks

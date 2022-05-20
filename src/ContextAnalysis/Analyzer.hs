@@ -16,24 +16,6 @@ import StandardLib.StandardLib (builtInFunctions)
 import ContextAnalysis.AnalyzerTypes
 
 
-data ExpressionType = Int | Bool | Array ExpressionType | Pointer ExpressionType | Any | Undefined
-    deriving (Show)
-
-instance Eq ExpressionType where
-  (==) Any _ = True
-  (==) _ Any = True
-  (==) Int Int = True
-  (==) Bool Bool = True
-  (==) (Array a) (Array b) = a == b
-  (==) (Pointer a) (Pointer b) = a == b
-  (==) _ _ = False
-
-
-data FunctionType = FunctionType {_arguments::[ExpressionType], _returned:: Maybe ExpressionType}
-    deriving (Eq, Show)
-makeLenses ''FunctionType
-
-
 data FunctionContext = FunctionContext { _returnType:: Maybe ExpressionType
                                        , _registeredVariables:: M.Map String ExpressionType
                                        , _callableFunctions:: M.Map String FunctionType
@@ -276,23 +258,24 @@ validateStatement (AST.ForStatement exIn exC exInc bd) = do
         throwError "For expression comparator should yield to Bool"
     else
         return Any
-validateStatement (AST.BindStatement exprPtr exprIdx func) = do
-    -- TODO refactor this
-    let errMsg = "Bind has type (Pointer b, Int, Function(Pointer b, Int) -> void)"
-    ptrType <- expressionType exprPtr
-    idxType <- expressionType exprIdx
-    rgF <- gets $ view callableFunctions
-    unless (ptrType == Pointer Any && idxType == Int) $ throwError errMsg
-    fType  <- (
-        case M.lookup func rgF of
-            Nothing -> throwError $ "Function " ++ func ++ "is not defined"
-            Just et -> return et
-        )
-    let (Pointer ptrB) = ptrType
-    void $ case (view returned fType, view arguments fType) of
-                (Nothing, [Pointer b, Int]) -> if b == ptrB then return () 
-                                               else throwError errMsg
-                _ -> throwError errMsg
+-- validateStatement (AST.BindStatement variable func) = do
+--     -- TODO refactor this
+--     let errMsg = "Bind has type (String, String) -> void)"
+--     -- ptrType <- expressionType exprPtr
+--     -- idxType <- expressionType exprIdx
+--     rgF <- gets $ view callableFunctions
+--     rgV <- gets $ view registeredVariables
+--     -- unless (ptrType == Pointer Any && idxType == Int) $ throwError errMsg
+--     fType  <- (
+--         case M.lookup func rgF of
+--             Nothing -> throwError $ "Function " ++ func ++ "is not defined"
+--             Just et -> return et
+--         )
+--     let (Pointer ptrB) = ptrType
+--     void $ case (view returned fType, view arguments fType) of
+--                 (Nothing, [Pointer b, Int]) -> if b == ptrB then return () 
+--                                                else throwError errMsg
+--                 _ -> throwError errMsg
 
     return Any
 validateStatement (AST.IfElseStatement ex ifbd ebd) = do

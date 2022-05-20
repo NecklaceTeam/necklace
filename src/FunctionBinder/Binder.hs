@@ -1,4 +1,5 @@
-module FunctionBinder.Resolver where
+{-# LANGUAGE TemplateHaskell #-}
+module FunctionBinder.Binder where
 
 import qualified Necklace.AST as N
 import qualified Data.Set as S
@@ -8,83 +9,91 @@ import Control.Monad.State (StateT (runStateT), gets, modify, void, State)
 import Control.Monad.Identity (Identity (runIdentity))
 import Control.Monad.Except (ExceptT, MonadError (throwError), runExceptT)
 import Data.IntMap.Strict (insert)
-
-data PointerBind = PointerBind { _name :: String, _bindingTable :: String, _bindedFunction :: String}
--- data VariableDefinition = Variable {_vType :: N.Type, _bindings :: S.Set N.Function}  
-newtype PointerDefinition = PointerDefinition { _bindings :: S.Set PointerBind }
-
-newtype Context = BinderContext { _pointerBindings :: M.Map String PointerDefinition }
-
-type FunctionBinder = ExceptT String (StateT Context Identity)
-
-resolveBindings :: Context -> FunctionBinder N.AST ->  (Either String N.AST, Context) 
-resolveBindings ctx binder =  runIdentity $ runStateT (runExceptT binder) ctx
-
--- Passing function as an argument -- aka function pointers
+import Control.Lens (makeLenses, set, over, (^.))
+import Necklace.AST (Body(_bstatements))
 
 
--- Bindings design
--- Each function has a generated additional function named binding resolver, binding resolver has the same 
--- signature + binding table 
---  
--- IDEA 
--- GENERATE FUNCTION X_BINDING_RESOLVER, IT SETS UP IF TO CHECK IF INDEX IS BINDED
--- CURRENTLY IT CONTAINS ONLY BIIIIG LIST OF IFS, IN THE FUTURE WE WANT TO OPOTIMIZE IT 
--- TO PERFORM SYMBOLIC OPTIMIZATIONS
+data BinderContext = BinderContext {
+    _bindableFunctions :: S.Set String,
+    _bindedFunctions :: S.Set String,
+    _variableBindings :: M.Map String [String]
+}
 
--- 
+makeLenses ''BinderContext
 
--- How to pass function as the argument
--- to resolve it on the level of an AST we need to provide a way to pass funcitons as arguments
--- It is probably easily doable in terms of llvm, each functions is a operand itself 
+type FunctionBinder = ExceptT String (StateT BinderContext Identity)
 
---  
+bindInExpression:: N.Expression -> FunctionBinder N.Expression
+bindInExpression expr = do
+    return expr
 
 
--- resolveForFunction :: N.Function -> FunctionBinder N.AST
--- resolveForFunction = 
 
--- bindings :: N.AST -> FunctionBinder N.AST 
--- bindings = mapM resolveForFunction
+bindInOperator:: N.Operator -> FunctionBinder N.Operator
+bindInOperator (N.Assign (N.Variable vName) valE) = do --HERE finished finish it
+    bValE <- bindInExpression valE
+    let exprRes = N.Operation $ N.Assign (N.Variable vName) bValE
+    varBindings <- gets $ (M.! vName).(^. variableBindings)
+    let (N.Operation result) = foldr triggerBinding exprRes varBindings
+    return result
+    where triggerBinding fN vN =  N.Operation $ N.Assign vN (N.FunctionCall fN [vN])  -- TODO reverse
 
--- bind :: N.Function -> FunctionBinder
--- bind = do
+bindInOperator oper = return oper
 
 
--- insertContexts :: N.AST -> N.AST
--- insertContexts ((N.Function name (N.FunctionType decs ret) body):fs) = 
---     let ctxArgs = [(N.Declaration "bdFunc" String),
---                    (N.Declaration "bdTabl" (Pointer N.Int))] in
---    (N.Function name (N.FunctionType (ctxArgs ++ decs) ret) body):ins 
+bindInStatement:: N.Statement -> FunctionBinder N.Statement
+bindInStatement (N.IfElseStatement expr tbody fbody) = do
+    bExpr <- bindInExpression expr
+    bTBody <- bindInBody tbody
+    bFBody <- bindInBody fbody
+    return (N.IfElseStatement bExpr bTBody bFBody)
+bindInStatement (N.ExpressionStatement expr) = do
+    bExpr <- bindInExpression expr
+    return (N.ExpressionStatement bExpr)
+bindInStatement (N.WhileStatement expr body) = do
+    bExpr <- bindInExpression expr
+    bBody <- bindInBody body
+    return (N.WhileStatement bExpr bBody)
+bindInStatement (N.ReturnStatement expr) = do
+    bExpr <- bindInExpression expr
+    return (N.ReturnStatement bExpr)
+bindInStatement (N.BindStatement varName funcName) = do
+    _variableBindings
+    return $ N.BindStatement varName funcName
+bindInStatement st = return st
+
+bindInBody:: N.Body -> FunctionBinder N.Body
+bindInBody body = do
+    bTstatements <- mapM bindInStatement (body ^. N.bstatements)
+    return $ N.Body { _bstatements=bTstatements }
+
+bindInFunction:: N.Function -> FunctionBinder N.Function
+bindInFunction fun = do
+    return fun
+
+collectFunctions:: N.AST -> FunctionBinder ()
+collectFunctions ast = do
+    let singleArgNames = map (^. N.fname) . filter ((== 1).length.(^. (N.ftype . N.args))) . (^. N.functions) $ ast
+    let funcMap = S.fromList singleArgNames
+    modify (set bindableFunctions funcMap)
+    return ()
+
+-- injectBindable = do
+--     ast
+
+bindVariables:: N.AST -> FunctionBinder N.AST
+bindVariables ast = do
+    collectFunctions ast
+    astWithBinds <- mapM bindInFunction (ast ^. N.functions)
+    return $ set N.functions astWithBinds ast
+
+
+resolveBindings :: BinderContext -> FunctionBinder N.AST ->  (Either String N.AST, BinderContext)
+resolveBindings ctx binder = runIdentity $ runStateT (runExceptT binder) ctx
+
 
 
 -- TODO Analyzer
 -- forbid function name "not_existing"
 -- forbid argument name "bdFunc"
 -- forbid argument name "bdTable"
-
-
-
--- func effect (string, pointerBin: *int, pointer: *int,  x: int){
-
--- }
-
-
--- func main {
---     x: *int
---     int x_binded_234215: *int
-
---     x = malloc(1)
-
---     // first bind to the array
---     bind x 0 effect
-
---     // it is replaced by
---     x_binded_234215 = malloc(1, bool)
---     *access(x_binded_234215, 0) = 1
---     // also we set 
-
---     *access(x, r) = 100000
---     if *access(x_binded_234215, r) do
---         call effect x r
--- }

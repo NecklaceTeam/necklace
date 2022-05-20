@@ -32,8 +32,7 @@ import qualified ContextAnalysis.Analyzer as ANZ
 import Control.Lens ((^.), _1, view)
 import ContextAnalysis.Analyzer (expressionType)
 
-newtype CodegenEnv = CodegenEnv { operands :: M.Map String LAST.Operand
-                                ; bindings :: M.Map String LAST.Operand }
+newtype CodegenEnv = CodegenEnv { operands :: M.Map String LAST.Operand }
     deriving (Eq, Show)
 
 
