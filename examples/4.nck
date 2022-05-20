@@ -31,7 +31,7 @@ function insertionSort(arr: *int, size: int) -> *int do
 end
 
 
-function main do
+function main -> int do
     c: *int;
     i: int;
     k: int;
@@ -54,5 +54,5 @@ function main do
       i = i + 1;
     end
     freeInt(c);
-    return;
+    return 0;
 end
