@@ -1,4 +1,4 @@
-function main do
+function main -> int do
   a: bool;
   b: bool;
   a = true;
@@ -22,5 +22,5 @@ function main do
     printInt(1);
   end
 
-  return;
+  return 0;
 end

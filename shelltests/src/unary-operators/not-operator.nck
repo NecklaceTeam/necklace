@@ -1,4 +1,4 @@
-function main do
+function main -> int do
   a: bool;
   b: bool;
   a = true;
@@ -6,5 +6,5 @@ function main do
   printBool(!a);
   printBool(!b);
 
-  return;
+  return 0;
 end

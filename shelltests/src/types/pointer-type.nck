@@ -1,4 +1,4 @@
-function main do
+function main -> int do
   a: int;
   b: int;
   temp: int;
@@ -23,5 +23,5 @@ function main do
   printInt(*pa);
   printInt(*pb);
 
-  return;
+  return 0;
 end

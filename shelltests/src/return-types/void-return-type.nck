@@ -15,9 +15,9 @@ function h(a: int) -> void do
   return;
 end
 
-function main do
+function main -> int do
   f();
   g(10);
   h(10);
-  return;
+  return 0;
 end
