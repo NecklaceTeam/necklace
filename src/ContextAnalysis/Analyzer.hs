@@ -101,7 +101,7 @@ binaryIntOp name l r = do
         (Int, Int) -> return Int
         -- TODO: refactor
         (Pointer a, Int) -> return $ Pointer a
-        _ -> throwError (name ++ " has type Int x Int -> Int")
+        _ -> throwError (name ++ " has type Int x Int -> Int |  Pointer a x Int -> Pointer a")
 
 binaryBoolOp ::String -> AST.Expression -> AST.Expression -> FunctionAnalyzer ExpressionType
 binaryBoolOp name l r = do
@@ -109,7 +109,8 @@ binaryBoolOp name l r = do
     rt <- expressionType r
     case (lt,rt) of
         (Bool, Bool) -> return Bool
-        _ -> throwError (name ++ " has type Bool x Bool -> Bool")
+        (Int, Int) -> return Bool
+        _ -> throwError (name ++ " has type Bool x Bool -> Bool | Int x Int -> Bool")
 
 binaryCompOp ::String -> AST.Expression -> AST.Expression -> FunctionAnalyzer ExpressionType
 binaryCompOp name l r = do
