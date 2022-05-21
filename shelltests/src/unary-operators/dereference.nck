@@ -1,9 +1,0 @@
-function main -> int do
-  a: int;
-  pa: *int;
-  a = 10;
-  *pa = a;
-  printInt(*pa):
-
-  return 0;
-end;
