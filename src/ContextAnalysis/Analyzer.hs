@@ -287,7 +287,6 @@ validateFunction:: AST.Function -> FunctionAnalyzer ExpressionType
 validateFunction fun = do
     mapM_ registerVariable (fun^.AST.ftype.AST.args)
     mapM_ registerVariable (fun^.AST.fbody.AST.fdeclarations)
-    let name = fun^.AST.fname
     (modify . set returnType . toExpressionTypeReturn ) (fun^.AST.ftype.AST.rtype)
     void $ validateStatements (fun^.AST.fbody.AST.fstatements)
     return Any
