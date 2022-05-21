@@ -130,7 +130,8 @@ Literal     : intLit                                                            
             | boolLit                                                              { BoolLiteral $1 }
             | '[' Expressions ']'                                                  { ArrayLiteral (reverse $2) }
           
-Statement   : if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
+Statement   : if Expression do Body end                                            { IfElseStatement $2 $4 (Body {_bstatements = []}) }
+            | if Expression do Body else Body end                                  { IfElseStatement $2 $4 $6 }
             | for '('Expression ',' Expression ',' Expression ')' do Body end      { ForStatement $3 $5 $7 $10}
             | Expression ';'                                                       { ExpressionStatement $1}
             | while Expression do Body end                                         { WhileStatement $2 $4}
@@ -151,6 +152,7 @@ FunctionBody: Declarations Statements                                           
 FunctionType: '('FunctionArgs')' '->' ReturnType                                   { FunctionType {_args=(reverse $2), _rtype=$5} }
             | '('FunctionArgs')'                                                   { FunctionType {_args=(reverse $2), _rtype=Void}}
             | '('')' '->' ReturnType                                               { FunctionType {_args=[], _rtype=$4} }
+            | '->' ReturnType                                                      { FunctionType {_args=[], _rtype=$2} }
             | '('')'                                                               { FunctionType {_args=[], _rtype=Void} }
             | {- empty -}                                                          { FunctionType {_args=[], _rtype=Void} }
 

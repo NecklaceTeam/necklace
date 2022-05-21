@@ -1,0 +1,25 @@
+function main do
+  a: int;
+  b: int;
+  temp: int;
+  pa: *int;
+  pb: *int;
+  a = -1;
+  b = 1;
+
+  printInt(a);
+  printInt(b);
+
+  *pa = a;
+  *pb = b;
+
+  printInt(*pa);
+  printInt(*pb);
+
+  temp = *pa;
+  *pa = *pb;
+  *pb = temp;
+
+  printInt(*pa);
+  printInt(*pb);
+end

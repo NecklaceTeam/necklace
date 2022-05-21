@@ -176,6 +176,7 @@ genExpression (N.FunctionCall name exprs) = do
   funcOp <- gets ((M.! name) . operands)
   args <- mapM (fmap (, []) . genExpression) exprs
   LInstruction.call funcOp args
+
 genExpression (N.Variable name) = do
   op <- gets ((M.! name) . operands)
   LInstruction.load op 0

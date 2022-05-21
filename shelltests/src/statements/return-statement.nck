@@ -1,0 +1,18 @@
+function add(a: int, b: int) -> int do
+  sum: int;
+  sum = a + b;
+  return sum;
+end
+
+function main do
+  sum: int;
+  x: int;
+  y: int;
+
+  x = 10;
+  y = 20;
+  sum = add(x, y);
+
+  printInt(sum);
+  return;
+end

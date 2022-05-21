@@ -31,7 +31,7 @@ if (2 > size) do
 end
 
 
-function main do
+function main -> int do
     c: *int;
     i: int;
     i = 10;
@@ -49,7 +49,7 @@ function main do
       printInt(*(c >> i));
       i = i - 1;
     end
-    return;
+    return 0;
 end
 /*
 Errors: duplicate function name and incorrect assignment. For integration tests

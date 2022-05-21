@@ -1,0 +1,7 @@
+function main do
+  a: int;
+  pa: *int;
+  a = 10;
+  *pa = a;
+  printInt(*pa):
+end;

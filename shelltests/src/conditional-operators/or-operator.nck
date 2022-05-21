@@ -1,0 +1,26 @@
+function main do
+  a: bool;
+  b: bool;
+  a = true;
+  b = false;
+
+  if (a || b) do
+    printInt(0);
+  end
+
+  if (a || true) do
+    printInt(1);
+  end
+
+  if (b || false) do
+    printInt(2);
+  end
+
+  if (true || a) do
+    printInt(3);
+  end
+
+  if (false || b) do
+    printInt(4);
+  end
+end

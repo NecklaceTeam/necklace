@@ -1,0 +1,12 @@
+function main do
+  a: int;
+  b: int;
+  c: int;
+  a = -1;
+  b = 0;
+  c = 1;
+
+  printInt(a);
+  printInt(b);
+  printInt(c);
+end

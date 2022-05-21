@@ -1,4 +1,4 @@
-function main do
+function main -> int do
     a: bool;
     b: int;
 
@@ -10,5 +10,5 @@ function main do
     end
     b = b * 5;
     printInt(b);
-    return;
+    return 0;
 end

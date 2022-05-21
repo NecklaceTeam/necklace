@@ -1,0 +1,11 @@
+function main do
+  a: int;
+  b: int;
+  c: int;
+  a = 10;
+  b = 21;
+
+  c = b / a;
+  printInt(c);
+  return;
+end
