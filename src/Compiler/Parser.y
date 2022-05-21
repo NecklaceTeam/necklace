@@ -56,6 +56,8 @@ import Prelude hiding(lex)
       '->'            { Lexeme _ TokenArrow }
       do              { Lexeme _ TokenDo }
       end             { Lexeme _ TokenEnd }
+      alloc           { Lexeme _ TokenAlloc }
+      free            { Lexeme _ TokenFree }
 
 
 %right '='
@@ -66,7 +68,7 @@ import Prelude hiding(lex)
 %left '>' '<' '<=' '>='     
 %left '+' '-'     
 %left '*' '/' '%'     
-%right NEG UNWRAP '!'      
+%right NEG UNWRAP '!'
 %left '['
      
 %%     
@@ -103,9 +105,10 @@ Operator   : Expression '*' Expression                                          
            | '-' Expression %prec NEG                                              { MinusUnary $2 }
            | Expression '=' Expression                                             { Assign $1 $3 }
            | Expression '[' Expression ']'                                         { ArrayIndex $1 $3 }
+           | alloc Allocable                                                       { Alloc $2 }
 
-     
-     
+Allocable  : Type '[' Expression ']'                                               { ArrayMem $1 $3 }
+
 Expression : Literal                                                               { LiteralExpression $1 }
            | name '(' Expressions ')'                                              { FunctionCall $1 (reverse $3) }
            | Operator                                                              { Operation $1 }
@@ -136,6 +139,7 @@ Statement   : if Expression do Body end                                         
             | return ';'                                                           { VoidReturnStatement }
             | break ';'                                                            { BreakStatement }
             | continue ';'                                                         { ContinueStatement }
+            | free Expression ';'                                                  { FreeStatement $2 }
 
 Statements : Statements Statement                                                  { $2 : $1 }
             | Statement                                                            { [$1] }                                          

@@ -57,6 +57,10 @@ toAstType N.Int = LTypes.i32
 toAstType N.Bool = LTypes.i1
 toAstType (N.Pointer N.Int) = LTypes.ptr LTypes.i32
 toAstType (N.Pointer N.Bool) = LTypes.ptr LTypes.i1
+toAstType (N.Array N.Int) = LTypes.ptr LTypes.i32
+toAstType (N.Array N.Bool) = LTypes.ptr LTypes.i1
+toAstType (N.Pointer N.Any) = LTypes.ptr LTypes.i8
+
 
 returnTypeToAstType:: N.ReturnType -> LAST.Type
 returnTypeToAstType (N.ReturnType t) = toAstType t
@@ -126,6 +130,13 @@ genOperator (N.Assign (N.Operation (N.UnwrapPointer ptr)) exprR) = do
   rOp <- genExpression exprR
   LInstruction.store lOp 0 rOp
   return rOp
+genOperator (N.Assign (N.Operation (N.ArrayIndex ptr n)) exprR) = do
+  lOp <- genExpression ptr
+  rOp <- genExpression exprR
+  ind <- genExpression n
+  pointer <- LInstruction.gep lOp [ind]
+  LInstruction.store pointer 0 rOp
+  return rOp
 genOperator (N.MoveRight exprL exprR) = do
   lOp <- genExpression exprL
   rOp <- genExpression exprR
@@ -135,7 +146,22 @@ genOperator (N.MoveLeft exprL exprR) = do
   rOp <- genExpression exprR
   nrOp <- LInstruction.sub (LConstant.int32 0) rOp
   LInstruction.gep lOp [nrOp]
+genOperator (N.Alloc (N.ArrayMem t expr)) = do
+  rOp <- genExpression expr
+  mallocOp <- gets ((M.! "malloca") . operands)
+  case t of 
+    N.Int -> do
+      result <- LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 4,[])]
+      LInstruction.bitcast result (LTypes.ptr LTypes.i32)
+    N.Bool -> do
+      result <- LInstruction.call mallocOp [(rOp,[]),(LConstant.int32 1,[])]
+      LInstruction.bitcast result (LTypes.ptr LTypes.i1)
 
+genOperator (N.ArrayIndex exprL exprR) = do
+  lOp <- genExpression exprL
+  rOp <- genExpression exprR
+  mOp <- LInstruction.gep lOp [rOp]
+  LInstruction.load mOp 0
 
 
 genExpression:: N.Expression  -> Generator LAST.Operand
@@ -195,6 +221,12 @@ genStatement (N.WhileStatement expr bd) = mdo
 
 
 genStatement (N.ExpressionStatement st) = void $ genExpression st
+genStatement (N.FreeStatement expr) = do
+  rOp <- genExpression expr
+  cOp <- LInstruction.bitcast rOp (LTypes.ptr LTypes.i8)
+  freeOp <- gets ((M.! "freePtr") . operands)
+  void $ LInstruction.call freeOp [(cOp,[])]
+
 genStatement (N.ReturnStatement expr) = do
   exprOp <- genExpression expr
   void $ LInstruction.ret exprOp
