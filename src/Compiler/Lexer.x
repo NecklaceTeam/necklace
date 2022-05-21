@@ -12,7 +12,7 @@ import qualified Data.Text.Lazy as T
 
 $whitechar            = [\t\n\r\v\f\ ]
 $special              = [\(\)\,\;\:\[\]]
-@keywords             = function|void|if|else|for|while|return|break|continue|"->"|do|end
+@keywords             = function|void|if|else|for|while|return|break|continue|"->"|do|end|alloc|free
 @id                   = ([a-zA-Z_][a-zA-Z0-9_]*)
 @operator             = "+"|"-"|"*"|"/"|"%"|"<"|">"|">="|"<="|"=="|"!="|"&&"|"||"|"="|"!"|">>"|"<<"
 @type                 = int|bool
@@ -38,6 +38,8 @@ tokens :-
 <0> "->"              { makeLexeme TokenArrow }
 <0> do                { makeLexeme TokenDo }
 <0> end               { makeLexeme TokenEnd }
+<0> alloc             { makeLexeme TokenAlloc }
+<0> free              { makeLexeme TokenFree }
 <0> \(                { makeLexeme TokenLeftParen }
 <0> \)                { makeLexeme TokenRightParen }
 <0> \,                { makeLexeme TokenComma }
@@ -76,7 +78,8 @@ data Token =
         TokenArrow               |
         TokenDo                  |
         TokenEnd                 |
-        TokenKeyword     String  |
+        TokenAlloc               |
+        TokenFree                |
         TokenType        String  |
         TokenOperator    String  |
         TokenBoolLiteral Bool    |

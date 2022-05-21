@@ -163,8 +163,8 @@ operatorType (AST.Assign var val) = do
             (Pointer a, Pointer b) | isMutable var -> if a == b then return $ Pointer a else throwError "Incorrect assignment"
             (Array a, Array b)     | isMutable var ->  if a == b then return $ Array a else throwError "Incorrect assignment"
             (a, Any)               | isMutable var -> return a
-            (_, _)                 | isMutable var ->  throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
-            _ -> throwError "Incorrect assignment to immutable expression"
+            (_, _)                 | isMutable var -> throwError $ "Incorrect assignment " ++ show valT ++ " to " ++ show varT
+            _                                      -> throwError "Incorrect assignment to immutable expression"
 operatorType (AST.MoveRight ptr idx) = do
         ptrT <- expressionType ptr
         idxT <- expressionType idx
@@ -176,15 +176,21 @@ operatorType (AST.MoveLeft ptr idx) = do
         idxT <- expressionType idx
         case (ptrT, idxT) of
             (Pointer a, Int) -> return $ Pointer a
-            _                -> throwError "Pointer shift has type (Pointer a) X Int -> Pointer a"
+            _                -> throwError "Pointer shift has type (Pointer a) X Int -> Pointer a"           
 operatorType (AST.ArrayIndex a n) = do
     varA <- expressionType a
     valN <- expressionType n
     case(varA, valN) of
         (Array z, Int) -> return z
-        (Array z,_) -> throwError "Index expression shoud yield Int"
-        (_,_) -> throwError "Value is not an Array"
+        (Array z,_) -> throwError "Index expression should yield Int"
+        _           -> throwError "Value is not an Array"
 
+operatorType (AST.Alloc (AST.ArrayMem t n)) = do
+    valN <- expressionType n
+    let arrT = toExpressionType t
+    case (arrT, valN) of
+        (arrT,Int) -> return $ Array arrT 
+        _          -> throwError "Array size should yield to Int"
 
 isMutable :: AST.Expression -> Bool
 isMutable (AST.Operation (AST.UnwrapPointer _))= True
@@ -261,6 +267,13 @@ validateStatement (AST.IfElseStatement ex ifbd ebd) = do
         throwError "If expression comparator should yield to Bool"
     else
         return Any
+
+validateStatement (AST.FreeStatement arr) = do
+    arrT <- expressionType arr
+    case arrT of
+        (Array t) -> return Any
+        _         -> throwError "Free expression should yield to array"
+
 validateStatement _ = return Any
 
 validateBody:: AST.Body -> FunctionAnalyzer ExpressionType

@@ -10,7 +10,7 @@ function insertionSort(arr: *int, size: int) -> *int do
   i: int;
   j: int;
 
-  if (2 > size) do
+if (2 > size) do
     return arr;
   else
     i = 1;
