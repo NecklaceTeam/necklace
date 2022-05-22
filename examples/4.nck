@@ -1,50 +1,34 @@
-function insertionSort(arr: *int, size: int) -> *int do
-  i: int;
-  j: int;
-  key: int;
+function main do
+    a : [int];
+    b : [bool];
 
-  if (2 > size) do
-    return arr;
-  else
-    i = 1;
-    while (i < size) do
-      key = *(arr >> i);
-      j = i - 1;
-      while (j >= 0 && *(arr >> j) > key) do
-        *(arr >> j+1) = *(arr >> j);
-        j = j-1;
-      end
-      *(arr >> j+1) = key;
-      i = i + 1;
-    end
-    return arr;
-  end
-  return arr;
-end
+    a = alloc int[10];
 
+    a[0] = 20;
 
-function main -> int do
-    c: *int;
-    i: int;
-    k: int;
-    i = 0;
-    k = 10;
-
-    c = allocIntArray(10);
-    while (i < 10) do
-      *(c >> i) = k;
-      printInt(*(c >> i));
-      k = k - 1;
-      i = i + 1;
-    end
-    insertionSort(c, 10);
+    a[1] = 10;
     
-    i = 0;
+    a[3] = 2;
 
-    while (i < 10) do
-      printInt(*(c >> i));
-      i = i + 1;
-    end
-    freeInt(c);
-    return 0;
+    b = alloc bool[3];
+
+    b[0] = true;
+
+    b[1] = false;
+
+    b[2] = true;
+
+    printInt(a[0]);
+    printInt(a[1]);
+    printInt(a[2]);
+    printInt(a[3]);
+
+    printBool(b[0]);
+    printBool(b[1]);
+    printBool(b[2]);
+
+    free a;
+    free b;
+
+    return;
 end

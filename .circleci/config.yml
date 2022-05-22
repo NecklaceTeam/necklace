@@ -29,9 +29,6 @@ jobs:
       - run:
           name: "Run tests"
           command: "stack test"
-      - run:
-          name: "Run shelltests"
-          command: "./shelltest.sh"
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
