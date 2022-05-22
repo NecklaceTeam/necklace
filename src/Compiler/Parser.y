@@ -111,6 +111,7 @@ Allocable  : Type '[' Expression ']'                                            
 
 Expression : Literal                                                               { LiteralExpression $1 }
            | name '(' Expressions ')'                                              { FunctionCall $1 (reverse $3) }
+           | name '('')'                                                           { FunctionCall $1 []}
            | Operator                                                              { Operation $1 }
            | '(' Expression ')'                                                    { SubExpression $2 }
            | name                                                                  { Variable $1 }
