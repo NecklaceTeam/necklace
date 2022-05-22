@@ -7,5 +7,7 @@ function main -> int do
 
   c = b / a;
   printInt(c);
+  printInt(a / 5);
+
   return 0;
 end
