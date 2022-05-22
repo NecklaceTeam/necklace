@@ -34,7 +34,7 @@ dependencies:
 - bytestring
 - utf8-string
 - process
-- shelltestrunner-1.9
+- shelltestrunner
 
 library:
   source-dirs: src
