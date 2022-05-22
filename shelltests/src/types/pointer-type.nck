@@ -1,27 +1,9 @@
 function main -> int do
-  a: int;
-  b: int;
-  temp: int;
-  pa: *int;
-  pb: *int;
-  a = -1;
-  b = 1;
+  b : *int;
+  b = allocIntArray(1);
 
-  printInt(a);
-  printInt(b);
-
-  *pa = a;
-  *pb = b;
-
-  printInt(*pa);
-  printInt(*pb);
-
-  temp = *pa;
-  *pa = *pb;
-  *pb = temp;
-
-  printInt(*pa);
-  printInt(*pb);
+  *(b>>0) = 20;
+  printInt(*(b>>0));
 
   return 0;
 end

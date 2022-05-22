@@ -1,0 +1,15 @@
+function main -> int do
+  a : [int];
+  a = alloc int[10];
+
+  a[0] = 20;
+  a[1] = 10;
+  a[3] = 2;
+
+  printInt(a[0]);
+  printInt(a[1]);
+  printInt(a[2]);
+  printInt(a[3]);
+
+  return 0;
+end
