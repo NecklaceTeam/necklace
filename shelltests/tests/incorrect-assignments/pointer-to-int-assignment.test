@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/incorrect-assignments/pointer-to-int-assignment.nck
+<<<
+>>>
+ERROR: Incorrect assignment Int to Pointer Int
+>>>2
+>>>=0

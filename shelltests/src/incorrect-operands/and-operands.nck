@@ -1,0 +1,12 @@
+function main -> int do
+  x: int;
+  y: int;
+
+  if (x && y) do
+    printInt(0);
+  else
+    printInt(1);
+  end
+
+  return 0;
+end

@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/miscellaneous-invalid/missing-argument.nck
+<<<
+>>>
+ERROR: Incorrect types
+>>>2
+>>>=0

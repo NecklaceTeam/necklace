@@ -1,0 +1,9 @@
+function main -> int do
+  b: *int;
+  x: int;
+
+  x = 10;
+  x = b;
+
+  return 0;
+end

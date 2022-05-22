@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/incorrect-operands/bool-comparison.nck
+<<<
+>>>
+ERROR: Less has type Int x Int -> Bool
+>>>2
+>>>=0

@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/invalid-syntax/empty-function.nck
+<<<
+>>>
+Syntax error at line 3 and column 1
+>>>2
+>>>=0

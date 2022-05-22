@@ -1,8 +1,10 @@
-function main do
+function main -> int do
   a: int;
   b: int;
   a = 10;
   b = -10;
   printInt(-a);
   printInt(-b);
+
+  return 0;
 end

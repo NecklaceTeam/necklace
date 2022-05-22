@@ -1,79 +1,50 @@
-function swap(a: *int, b: *int) do
-  h: int;
-  h = *a;
-  *a = *b;
-  *b = h;
-  return;
-end
-
 function insertionSort(arr: *int, size: int) -> *int do
   i: int;
   j: int;
+  key: int;
 
-if (2 > size) do
+  if (2 > size) do
     return arr;
   else
     i = 1;
     while (i < size) do
-      j = i;
-      while (j < size) do
-        if *(arr >> j) < *(arr  >> j - 1) do
-          swap((arr >> j), (arr >> j-1));
-          j = j + 1;
-        else
-          j = j + 1;
-        end
+      key = *(arr >> i);
+      j = i - 1;
+      while (j >= 0 && *(arr >> j) > key) do
+        *(arr >> j+1) = *(arr >> j);
+        j = j-1;
       end
+      *(arr >> j+1) = key;
       i = i + 1;
     end
     return arr;
   end
+  return arr;
 end
 
 
 function main -> int do
     c: *int;
     i: int;
-    i = 10;
+    k: int;
+    i = 0;
+    k = 10;
 
     c = allocIntArray(10);
-
-    while (i >= 0) do
-      *(c >> i);
-      i = i - 1;
+    while (i < 10) do
+      *(c >> i) = k;
+      printInt(*(c >> i));
+      k = k - 1;
+      i = i + 1;
     end
     insertionSort(c, 10);
     
-    i = 10;
-    while (i >= 0) do
+    i = 0;
+
+    while (i < 10) do
       printInt(*(c >> i));
-      i = i - 1;
+      i = i + 1;
     end
+    freeInt(c);
     return 0;
 end
-/*
-Errors: duplicate function name and incorrect assignment. For integration tests
-function main do
-    c: *int;
-    i: int;
-    i = 10;
-    10=10
-
-    c = allocIntArray(10);
-
-    while (i >= 0) do
-      *(c >> i);
-      i = i - 1;
-    end
-    *(c >> i) = 10
-    insertionSort(c, 10);
-    
-    i = 10;
-    while (i >= 0) do
-      printInt(*(c >> i));
-      i = i - 1;
-    end
-    return;
-  
-end
-*/

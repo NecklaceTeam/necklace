@@ -1,0 +1,11 @@
+function f -> bool do
+  x: int;
+  x = 0;
+  return x;
+end
+
+function main -> int do
+  f();
+
+  return 0;
+end

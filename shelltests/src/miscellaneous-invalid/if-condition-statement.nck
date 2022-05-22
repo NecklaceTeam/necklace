@@ -1,0 +1,9 @@
+function main -> int do
+  x: int;
+
+  if (x = 0) do
+    printInt(x);
+  end
+
+  return 0;
+end

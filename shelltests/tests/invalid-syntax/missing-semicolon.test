@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/invalid-syntax/missing-semicolon.nck
+<<<
+>>>
+Syntax error at line 3 and column 1
+>>>2
+>>>=0

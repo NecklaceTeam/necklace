@@ -40,7 +40,7 @@ spec = describe "ContextAnalysis" $ do
                       (AST.LiteralExpression intLit)
                     )
                   )
-       analyzeFunction funcCtx (ANZ.expressionType ast) `shouldBe` (Left "And has type Bool x Bool -> Bool", funcCtx)
+       analyzeFunction funcCtx (ANZ.expressionType ast) `shouldBe` (Left "And has type Bool x Bool -> Bool | Int x Int -> Bool", funcCtx)
     it "performs correct negation" $ do
        let ast = AST.SubExpression (
                   AST.Operation (

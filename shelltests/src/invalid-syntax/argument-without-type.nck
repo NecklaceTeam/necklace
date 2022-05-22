@@ -1,0 +1,9 @@
+function f(x) -> int do
+  printInt(x);
+  return x;
+end
+
+function main -> int do
+  f();
+  return 0;
+end

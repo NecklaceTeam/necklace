@@ -1,4 +1,4 @@
-function main do
+function main -> int do
   x: int;
   y: int;
   temp: int;
@@ -16,5 +16,5 @@ function main do
   printInt(x);
   printInt(y);
 
-  return;
+  return 0;
 end

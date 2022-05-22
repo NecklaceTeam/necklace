@@ -1,0 +1,10 @@
+function f -> int do
+  x: int;
+  x = 0;
+end
+
+function main -> int do
+  f();
+
+  return 0;
+end

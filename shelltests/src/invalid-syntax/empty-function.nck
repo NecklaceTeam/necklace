@@ -1,0 +1,9 @@
+function f -> void do
+
+end
+
+function main -> int do
+  f();
+
+  return 0;
+end

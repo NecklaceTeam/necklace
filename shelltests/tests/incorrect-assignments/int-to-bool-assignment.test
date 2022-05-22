@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/incorrect-assignments/int-to-bool-assignment.nck
+<<<
+>>>
+ERROR: Incorrect assignment Int to Bool
+>>>2
+>>>=0

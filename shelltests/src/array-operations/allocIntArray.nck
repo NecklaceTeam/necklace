@@ -1,0 +1,15 @@
+function main -> int do
+  b : *int;
+  b = allocIntArray(10);
+
+  *(b>>0) = 20;
+  *(b>>1) = 10;    
+  *(b>>3) = 2;
+  
+  printInt(*(b>>0));
+  printInt(*(b>>1));
+  printInt(*(b>>2));
+  printInt(*(b>>3));
+
+  return 0;
+end

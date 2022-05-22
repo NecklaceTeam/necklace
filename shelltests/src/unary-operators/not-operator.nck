@@ -1,8 +1,10 @@
-function main do
+function main -> int do
   a: bool;
   b: bool;
   a = true;
   b = false;
   printBool(!a);
   printBool(!b);
+
+  return 0;
 end

@@ -1,0 +1,14 @@
+function main -> int do
+  x: bool;
+  y: bool;
+  x = true;
+  y = false;
+
+  if (x < y) do
+    printBool(x);
+  else
+    printBool(y);
+  end
+
+  return 0;
+end

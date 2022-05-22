@@ -12,7 +12,7 @@ function g -> bool do
   return a;
 end
 
-function main do
+function main -> int do
   a: int;
   b: bool;
 
@@ -20,4 +20,6 @@ function main do
   b = g();
   printInt(a);
   printBool(b);
+
+  return 0;
 end

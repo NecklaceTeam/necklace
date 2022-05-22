@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/miscellaneous-invalid/while-condition-statement.nck
+<<<
+>>>
+ERROR: While expression should yield to Bool
+>>>2
+>>>=0
