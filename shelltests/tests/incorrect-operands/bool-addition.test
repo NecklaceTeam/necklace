@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/incorrect-operands/bool-addition.nck
+<<<
+>>>
+ERROR: Plus has type Int x Int -> Int |  Pointer a x Int -> Pointer a
+>>>2
+>>>=0

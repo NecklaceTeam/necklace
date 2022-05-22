@@ -1,0 +1,12 @@
+function f(x: int) -> int do
+  printInt(x);
+  return x;
+end
+
+function main -> int do
+  b: bool;
+  b = true;
+  f(b);
+
+  return 0;
+end

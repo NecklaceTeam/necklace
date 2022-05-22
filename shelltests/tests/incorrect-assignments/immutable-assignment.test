@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/incorrect-assignments/immutable-assignment.nck
+<<<
+>>>
+ERROR: Incorrect assignment to immutable expression
+>>>2
+>>>=0

@@ -1,0 +1,5 @@
+function f -> bool do
+  x: int;
+  x = 0;
+  return true;
+end

@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/miscellaneous-invalid/double-main.nck
+<<<
+>>>
+ERROR: Function main is already declared in this scope
+>>>2
+>>>=0

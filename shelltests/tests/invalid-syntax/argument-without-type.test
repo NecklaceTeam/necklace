@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/invalid-syntax/argument-without-type.nck
+<<<
+>>>
+Syntax error at line 1 and column 13
+>>>2
+>>>=0

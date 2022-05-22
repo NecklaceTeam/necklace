@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/miscellaneous-invalid/undeclared-variable.nck
+<<<
+>>>
+ERROR: Variable x is not declared
+>>>2
+>>>=0

@@ -1,0 +1,10 @@
+function main -> int do
+  x: int;
+  y: bool;
+  x = 0;
+  y = true;
+
+  x = y;
+
+  return 0;
+end

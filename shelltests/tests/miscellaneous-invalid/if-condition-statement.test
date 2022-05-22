@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/miscellaneous-invalid/if-condition-statement.nck
+<<<
+>>>
+ERROR: If expression comparator should yield to Bool
+>>>2
+>>>=0

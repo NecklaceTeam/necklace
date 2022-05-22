@@ -1,0 +1,4 @@
+function main -> int do
+  10 = 10;
+  return 0;
+end

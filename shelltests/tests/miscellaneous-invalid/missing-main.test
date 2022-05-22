@@ -1,0 +1,5 @@
+stack run necklace-exe shelltests/src/miscellaneous-invalid/missing-main.nck
+<<<
+>>>
+>>>2 /.*undefined reference to `main'.*/
+>>>=1

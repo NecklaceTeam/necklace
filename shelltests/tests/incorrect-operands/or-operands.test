@@ -1,0 +1,5 @@
+stack run necklace-exe shelltests/src/incorrect-operands/or-operands.nck
+<<<
+>>>
+>>>2 /necklace-exe: VerifyException "Branch condition is not.*/
+>>>=1

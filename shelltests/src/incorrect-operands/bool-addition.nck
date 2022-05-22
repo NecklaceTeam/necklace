@@ -1,0 +1,10 @@
+function main -> int do
+  x: bool;
+  y: bool;
+  x = true;
+  y = false;
+
+  printBool(x + y);
+
+  return 0;
+end

@@ -1,0 +1,5 @@
+function main -> int do
+  x = 0;
+  printInt(x);
+  return 0;
+end

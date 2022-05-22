@@ -1,0 +1,6 @@
+stack run necklace-exe shelltests/src/incorrect-types/return-type-mismatch.nck
+<<<
+>>>
+ERROR: Expected other return type
+>>>2
+>>>=
