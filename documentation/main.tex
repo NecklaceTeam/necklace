@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{array}
+\usepackage{comment}
 \allowdisplaybreaks
 \usepackage{graphicx}
 \graphicspath{ {./images/} }
@@ -16,9 +17,13 @@
 \maketitle
 \section{Abstract}
 Necklace is a tiny, imperative, statically, strongly typed language with Elixir-like syntax.
-Made for Group Project 1 \& 2 at Jagiellonian University
+Made for Group Project 1 \& 2 at Jagiellonian University. Source code is hosted on GitHub repository: \url{https://github.com/NecklaceTeam/necklace}
 
-
+\section{Roles}
+\begin{itemize}
+    \item Engineering and Language Design: \textit{Maksymilian Demitraszek, Paweł Gmerek}
+    \item Testing: \textit{Michał Kuliński}
+\end{itemize}
 \section{Compiler architecture}
 \subsection{Overview}
 Necklace is a 2 phase compiler
@@ -68,7 +73,7 @@ end
 function array_operations(a: *int, size: int) -> void do
     i: int;
     for (i = 0; i < size; i += 1) {
-        (a + i)* +=1
+        (a >> i)* +=1
     }
 end
 
@@ -96,7 +101,7 @@ end
 \section{Grammar}
 \begin{align*}
 <start> &\longrightarrow \ <function>^* \\
-<type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{*} <type> \\
+<type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{*} <type> \ | \textbf{[} <type> \textbf{]}\\
 <return\_type> &\longrightarrow \ <type> \ | \ \textbf{void} \\
 <function>  &\longrightarrow \\ 
     &| \ \textbf{function} <name> <arguments> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} \\
@@ -255,30 +260,32 @@ With behaviour defined as
 $$
 x\%y = r \ \ \ \ r = x - yk, x \in C
 $$
+\begin{comment}
+    \subsubsection{'toBool' conversion}
+    $$
+    toBool: int \longrightarrow bool
+    $$
+    With behaviour defined as
+    $$
+    toBool(x) =  \left\{ \begin{array}{ll}
+    false & x == 0  \\
+    true & otherwise \\
+    \end{array} \right.
+    $$
+    
+    \subsubsection{'toInt' conversion}
+    $$
+    toInt: bool \longrightarrow int
+    $$
+    With behaviour defined as
+    $$
+    toInt(x) =  \left\{ \begin{array}{ll}
+    0 & x == false  \\
+    1 & x == true \\
+    \end{array} \right.
+    $$
+\end{comment}
 
-\subsubsection{'toBool' conversion}
-$$
-toBool: int \longrightarrow bool
-$$
-With behaviour defined as
-$$
-toBool(x) =  \left\{ \begin{array}{ll}
-false & x == 0  \\
-true & otherwise \\
-\end{array} \right.
-$$
-
-\subsubsection{'toInt' conversion}
-$$
-toInt: bool \longrightarrow int
-$$
-With behaviour defined as
-$$
-toInt(x) =  \left\{ \begin{array}{ll}
-0 & x == false  \\
-1 & x == true \\
-\end{array} \right.
-$$
 \subsubsection{'$==$' binary operator}
 $$
 (==): int \times int \longrightarrow bool
@@ -334,13 +341,106 @@ $$
 
 \section{Tests}
 Necklace test suite includes unit tests for lexer and context sensitive analysis and integration tests for basic language functionalities.
+\section{Installation guide}
+\subsection{Requirements}
+\begin{itemize}
+    \item llvm9 on you linux machine
+    \item If llvm-hs does not detect llvm-config-9 you can symlink it as llvm-conifg and add it to the PATH
+\end{itemize}
+\subsection{How to start}
+You need installed llvm9 and stack
+\begin{verbatim}
+$ stack install alex happy
+$ stack install
+$ stack run necklace-exe `<file_name>.nck`
+\end{verbatim}
+
+\section{Insertion sort in Necklace}
+\begin{verbatim}
+function insertionSort(arr: *int, size: int) -> *int do
+  i: int;
+  j: int;
+  key: int;
+
+  if (2 > size) do
+    return arr;
+  else
+    i = 1;
+    while (i < size) do
+      key = *(arr >> i);
+      j = i - 1;
+      while (j >= 0 && *(arr >> j) > key) do
+        *(arr >> j+1) = *(arr >> j);
+        j = j-1;
+      end
+      *(arr >> j+1) = key;
+      i = i + 1;
+    end
+    return arr;
+  end
+  return arr;
+end
 
 
+function main -> int do
+    c: *int;
+    i: int;
+    k: int;
+    i = 0;
+    k = 10;
+
+    c = allocIntArray(10);
+    while (i < 10) do
+      *(c >> i) = k;
+      printInt(*(c >> i));
+      k = k - 1;
+      i = i + 1;
+    end
+    insertionSort(c, 10);
+    
+    i = 0;
+
+
+
+    while (i < 10) do
+      printInt(*(c >> i));
+      i = i + 1;
+    end
+    freeInt(c);
+    return 0;
+end
+\end{verbatim}
+When compiled and run, it returns to stdout an array of numbers from 1 to 10 in reverse order, sorts them and prints it sorted.
+\begin{verbatim}
+    10
+    9
+    8
+    7
+    6
+    5
+    4
+    3
+    2
+    1
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+    10
+\end{verbatim}
 
 \section{References}
 \begin{enumerate}
     \item  Engineering a Compiler, by Keith D. Cooper & Linda Troczon
     \item MiT compilers course, decaf lang
+    \item Write you a Haskell 2 Lexer \& Parser \url{https://jktkops.github.io/Write-You-a-Haskell-2/}
+    \item Micro C Codegen blogposts \url{https://blog.josephmorag.com/tags/llvm/}
+    \item shelltestrunner library
 \end{enumerate}
 
 \end{document}
