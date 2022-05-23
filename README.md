@@ -9,7 +9,9 @@ Necklace is a tiny, imperative, statically, strongly typed language with Elixir-
  - pointer support
  - while loops
  - if statements
- 
+## Contribution roles
+ - Engineering & Language Design: @MaksymilianDemitraszek @pagmerek
+ - Testing: @Qqkyu
 ## Example code
 ```
 function main do
