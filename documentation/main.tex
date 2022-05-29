@@ -87,7 +87,7 @@ end
 \section{Tokens}
 \subsubsection{Regular Expressions}
 \begin{verbatim}
-    @keywords = "(function|if|else|for|while|return|break|continue|->|do|end|alloc|free)"
+    @keywords = "(function|if|else|while|return|break|continue|->|do|end|alloc|free)"
     @varId = "[A-Za-z][A-Za-z0-9_]*"
     @int_lit = "([0-9])+" 
     @bool_lit = "true|false"
@@ -103,52 +103,57 @@ end
 <start> &\longrightarrow \ <function>^* \\
 <type> &\longrightarrow \ \textbf{bool} \ | \ \textbf{int} \ | \ \textbf{*} <type> \ | \textbf{[} <type> \textbf{]}\\
 <return\_type> &\longrightarrow \ <type> \ | \ \textbf{void} \\
-<function>  &\longrightarrow \\ 
-    &| \ \textbf{function} <name> <arguments> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} \\
-    &| \ \textbf{function} <name> \textbf{-\textgreater} <return\_type> \textbf{do} \ <function\_body> \ \textbf{end} 
-    \\
-    &| \ \textbf{function} <name> <arguments> \textbf{do} \ <function\_body> \ \textbf{end} \\
-    &| \ \textbf{function} <name> <arguments> \textbf{do} \ <function\_body> \ \textbf{end} \\
-<arguments> &\longrightarrow \ \textbf{(} <function\_args>\textbf{)} \\
-<function\_args> &\longrightarrow \ <name> \textbf{:} <type> (\textbf{,} <name> \textbf{:} <type>)^* \\
+<function>  &\longrightarrow  \textbf{function} <name> <function\_type> \textbf{do} \ <function\_body> \ \textbf{end} \\
+<function\_type> &\longrightarrow \ 
+\textbf{(} <function\_args> \textbf{)} \ 
+\textbf{-\textgreater} <return\_type>\\
+&| \ \textbf{(} <function\_args> \textbf{)} \\
+&| \ \textbf{()} \  \textbf{-\textgreater} <return\_type> \\
+&| \ \textbf{-\textgreater} <return\_type> \\
+&| \ \textbf{(} <function\_args> \textbf{)} \\
+&| \  \textbf{()} \\
+&| \ \epsilon \\
+<function\_args> &\longrightarrow \  <function\_args> \textbf{,} <declaration> | <declaration> \\
 <function\_body> &\longrightarrow \ <declaration>^* <statement>^+ \\
 <body> &\longrightarrow \ <statement>^* \\
-<statement> &\longrightarrow \ <function\_call>; \\
-    &| \ <name> \textbf{=} <expression> \textbf{;}\\ 
+<statement> &\longrightarrow  \ <name> \textbf{=} <expression> \textbf{;}\\ 
     &| \ \textbf{if } <expr> \textbf{do} <body> \textbf{else} <body>  \ \textbf{end} \\
     &| \ \textbf{for (} <expr> \textbf{,} <expr> \textbf{,} <expr> \textbf{) do} <body> \textbf{end} \\ 
     &| \ \textbf{while} <expr> \textbf{do} <body> \textbf{end} \\
-    &| \ \textbf{free} <expr>;
+    &| \ <expr>; \\
+    &| \ \textbf{free} <expr>; \\
     &| \ \textbf{return} <expr> \textbf{;} \\
     &| \ \textbf{return;} \\
 <declaration>  &\longrightarrow \ <name> \textbf{:} <type> \textbf{;} \\
-<expression> &\longrightarrow \ <expression> <binary\_operator> <expression> \\
-    &| \ <unary\_operator> <expression> \\
-    &| \ ( <expression> ) \\
-    &| \ <function\_call> \\
+<expression> &\longrightarrow \ <operator>\\
+    &| \ \textit{@varId} \textbf{(} <expression>^* \textbf{)} \\
+    &| \ \textbf{(} <expression> \textbf{)} \\
+    &| \ <operator> \\
     &| \ <literal> \\
-<unary\_operator> &\longrightarrow \ \textbf{*} \ | \ \textbf{-} \ | \ \textbf{!} \\
-<binary\_operator> &\longrightarrow \ <arithmetic\_operator> \\ 
-    &| \ <relational\_operator> \\
-    &| \ <equality\_operator
-    &| \ <conditional\_operator> \\
-<arithmetic\_operator> &\longrightarrow \ \textbf{+} \
-    | \ \textbf{-} \
-    | \ \textbf{*} \
-    | \ \textbf{/} \
-    | \ \textbf{\%} \\
-<relational\_operator> &\longrightarrow \ \textbf{\textless} \
-    | \ \textbf{\textgreater} \
-    | \ \textbf{\textless=} \
-    | \ \textbf{\textgreater=} \\
-<equality\_operator> &\longrightarrow \ \textbf{==} \ | \ \textbf{!=} \\
-<conditional\_operator> &\longrightarrow \ \textbf{\&\&} \ | \ \textbf{$\mid\mid$} \\
-<function\_call> &\longrightarrow \ <function\_name> ( <expr>^* ) \\
-<function\_name> &\longrightarrow \ <name> \\
-<literal> &\longrightarrow \ <int\_literal> \ | \ <bool\_literal> \\
-<int\_literal> &\longrightarrow \ - <digit>^+|<digit>^+ \\
-<bool\_literal> &\longrightarrow \ \textbf{true} \ | \ \textbf{false} \\
-<identifier> &\longrightarrow \ <letter> \ | \ <identifier> <letter> \ | \ <identifier><digit> \\
+    &| \ \textit{@varId} \\
+<operator> &\longrightarrow \ <expression> \textbf{*} <expression \\
+    &| \ <expression> \textbf{-} <expressiosn> \\
+    &| \ <expression> \textbf{+} <expression> \\
+    &| \ <expression> \textbf{/} <expression> \\
+    &| \ <expression> \textbf{\%} <expression> \\
+    &| \ <expression> \textbf{$<$} <expression> \\
+    &| \ <expression> \textbf{$<=$} <expression> \\
+    &| \ <expression> \textbf{$>$} <expression> \\
+    &| \ <expression> \textbf{$>=$} <expression> \\
+    &| \ <expression> \textbf{==} <expression> \\
+    &| \ <expression> \textbf{!=} <expression> \\
+    &| \ <expression> \textbf{\&\& } <expression> \\
+    &| \ <expression> \textbf{$\Vert$} <expression> \\
+    &| \ <expression> \textbf{$>>$} <expression> \\
+    &| \ <expression> \textbf{$<<$} <expression> \\
+    &| \ \textbf{!} <expression> \\
+    &| \ \textbf{*} <expression> \\
+    &| \ \textbf{-} <expression> \\
+    &| \ <expression> \textbf{=} <expression> \\
+    &| \ <expression> \textbf{[} <expression> \textbf{]} \\
+    &| \ \textbf{alloc} <allocable> \\
+<allocable> &\longrightarrow \ <type> \textbf{[} <expression> \textbf{]} \\
+<literal> &\longrightarrow \ <@int\_lit> \ | \ <@bool\_lit> \\
 \end{align*}
 \subsection{Operators Precedence}
 \begin{center}
@@ -172,12 +177,14 @@ end
  \hline
  8 & Logical OR & $||$ & Left to right \\
  \hline
- 9 & Assignment & $=$ & Right to left \\
+ 9 & Pointer move & $>>$, $<<$ & Left to right \\
+ \hline
+ 10 & Assignment & $=$ & Right to left \\
  \hline
 \end{tabular}
 \end{center}
 \section{Type system}
-Necklace is a strongly typed language, so all type conversions have to be explicit.
+Necklace is a strongly typed language, so all type conversions have to be explicit. In fact they are not allowed at all.
 \subsection{Base types}
 \subsubsection{Boolean}
 Declaration 
@@ -328,23 +335,18 @@ $$
 $$
 \subsubsection{'if' conditional operator}
 $$
-if \ bool \ do \ <block> \ end
+if \ bool \ do \ <block> \ else <block> end
 $$
 \subsubsection{'while' binary operator}
 $$
 while \ bool \ do \ <block> \ end
 $$
-\subsubsection{'for' binary operator}
-$$
-for \ <type> \ bool \ <type> \ do \ <block> \ end
-$$
-
 \section{Tests}
 Necklace test suite includes unit tests for lexer and context sensitive analysis and integration tests for basic language functionalities.
 \section{Installation guide}
 \subsection{Requirements}
 \begin{itemize}
-    \item llvm9 on you linux machine
+    \item llvm9 on your linux machine
     \item If llvm-hs does not detect llvm-config-9 you can symlink it as llvm-conifg and add it to the PATH
 \end{itemize}
 \subsection{How to start}
@@ -355,7 +357,8 @@ $ stack install
 $ stack run necklace-exe `<file_name>.nck`
 \end{verbatim}
 
-\section{Insertion sort in Necklace}
+\section{Results}
+We managed to implement an insertion sort algorithm in Necklace
 \begin{verbatim}
 function insertionSort(arr: *int, size: int) -> *int do
   i: int;
@@ -433,6 +436,14 @@ When compiled and run, it returns to stdout an array of numbers from 1 to 10 in 
     9
     10
 \end{verbatim}
+
+\section{Libraries}
+\begin{enumerate}
+    \item \url{https://github.com/simonmichael/shelltestrunner}
+    \item https://github.com/haskell/alex
+    \item https://github.com/haskell/happy
+\end{enumerate}
+
 
 \section{References}
 \begin{enumerate}
