@@ -263,10 +263,6 @@ $$
 $$
 (\%): int \times int \longrightarrow int
 $$
-With behaviour defined as
-$$
-x\%y = r \ \ \ \ r = x - yk, x \in C
-$$
 \begin{comment}
     \subsubsection{'toBool' conversion}
     $$
@@ -360,7 +356,7 @@ $ stack run necklace-exe `<file_name>.nck`
 \section{Results}
 We managed to implement an insertion sort algorithm in Necklace
 \begin{verbatim}
-function insertionSort(arr: *int, size: int) -> *int do
+function insertionSort(arr: [int], size: int) -> [int] do
   i: int;
   j: int;
   key: int;
@@ -370,13 +366,13 @@ function insertionSort(arr: *int, size: int) -> *int do
   else
     i = 1;
     while (i < size) do
-      key = *(arr >> i);
+      key = arr[i];
       j = i - 1;
-      while (j >= 0 && *(arr >> j) > key) do
-        *(arr >> j+1) = *(arr >> j);
+      while (j >= 0 && arr[j] > key) do
+        arr[j+1] = arr[j];
         j = j-1;
       end
-      *(arr >> j+1) = key;
+      arr[j+1] = key;
       i = i + 1;
     end
     return arr;
@@ -386,32 +382,32 @@ end
 
 
 function main -> int do
-    c: *int;
+    c: [int];
     i: int;
     k: int;
     i = 0;
     k = 10;
 
-    c = allocIntArray(10);
+    c = alloc int[10];
     while (i < 10) do
-      *(c >> i) = k;
-      printInt(*(c >> i));
+      c[i] = k;
+      printInt(c[i]);
       k = k - 1;
       i = i + 1;
     end
+    
     insertionSort(c, 10);
     
     i = 0;
 
-
-
     while (i < 10) do
-      printInt(*(c >> i));
+      printInt(c[i]);
       i = i + 1;
     end
-    freeInt(c);
+    free c;
     return 0;
 end
+
 \end{verbatim}
 When compiled and run, it returns to stdout an array of numbers from 1 to 10 in reverse order, sorts them and prints it sorted.
 \begin{verbatim}
@@ -445,13 +441,15 @@ When compiled and run, it returns to stdout an array of numbers from 1 to 10 in 
 \end{enumerate}
 
 
-\section{References}
+\section{Bibliography}
 \begin{enumerate}
-    \item  Engineering a Compiler, by Keith D. Cooper & Linda Troczon
-    \item MiT compilers course, decaf lang
+    \item  Engineering a Compiler 2nd edition, by Keith D. Cooper & Linda Troczon
+    \item MIT Decaf language
+    \url{https://ocw.mit.edu/courses/6-035-computer-language-engineering-spring-2010/1b21d612e072d1aad797f040a8bfdb6b_MIT6_035S10_decaf.pdf}
     \item Write you a Haskell 2 Lexer \& Parser \url{https://jktkops.github.io/Write-You-a-Haskell-2/}
-    \item Micro C Codegen blogposts \url{https://blog.josephmorag.com/tags/llvm/}
-    \item shelltestrunner library
+    \item ANSI C grammar \url{https://www.lysator.liu.se/c/ANSI-C-grammar-y.html}
+    \item Micro C blogposts
+    \url{https://blog.josephmorag.com/tags/llvm/}
 \end{enumerate}
 
 \end{document}
